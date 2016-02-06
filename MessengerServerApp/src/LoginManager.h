@@ -6,27 +6,29 @@
 
 #include "MessengerServer.h"
 #include "MThread.h"
-#include "MultipleTCPSocketsListener.h"
 #include "TCPMessengerProtocol.h"
 #include "TCPSocket.h"
 
 // Handles the login and registration requests
 class LoginManager: public MThread {
 	const char* _loginFile = "connections.txt";
-	std::map<std::string, TCPSocket*> peers; // peers who didn't logged in
-	bool running;
-	MultipleTCPSocketsListener *listener;
-	MessengerServer* _serverManager;
+	bool _running;
+	std::map<std::string, TCPSocket*> _peers; // peers which didn't log in
+	MessengerServer* _messengerServer;
 
+	// Search in file for the given username and password.
 	bool login(string userName, string password);
+
+	// Write to file the new user with his details
 	bool signUp(string userName, string password);
 
 public:
 
-	LoginManager(MessengerServer* _serverManager);
+	LoginManager(MessengerServer* messengerServer);
+	virtual ~LoginManager();
+
 	void run();
 	void addPeer(TCPSocket* peer);
-	virtual ~LoginManager();
 };
 
 class Connection: public MThread {
