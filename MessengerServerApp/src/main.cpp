@@ -23,9 +23,9 @@ int main() {
 	cout << "Welcome to TCP messenger Server" << endl;
 	printInstructions();
 
-	MessengerServer messengerServer("connctions.txt"); // listens to all of the sockets who have been connected (in the usersMap)
-	LoginManager loginManager(&messengerServer); // handles the requests of all peer in the peer map (non-users)
-	Listener listener(&loginManager); // listen to all of the new connections and adds the peers to the peer map.
+	MessengerServer messengerServer("connctions.txt"); // Listens to all of the users which have been connected
+	LoginManager loginManager(&messengerServer); // Handles the requests of all peer in the peer pool (non-users)
+	Listener listener(&loginManager); // Listen to all of the new connections and adds the peers to the peer pool
 
 	bool running = true;
 	while (running) {
@@ -42,7 +42,6 @@ int main() {
 		} else if (command == "lru") {
 			string chatRoom;
 			cin >> chatRoom;
-
 			messengerServer.getListChatUsers(chatRoom); // List of users in a specific room
 		} else if (command == "p") {
 			printInstructions();

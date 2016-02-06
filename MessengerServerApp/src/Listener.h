@@ -19,8 +19,11 @@ class Listener: public MThread {
 public:
 
 	Listener(LoginManager* registration);
-	void run();
 	virtual ~Listener();
+
+	// Waits for connection from new peers and adds them to the peer pool
+	void run();
+
 };
 
 #endif /* LISTENER_H_ */
