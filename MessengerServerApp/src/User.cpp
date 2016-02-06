@@ -1,13 +1,12 @@
 #include "User.h"
 
-User::User(string name, TCPSocket* sock)
-{
-	_sock = sock;
-	string tempport;
-	istringstream liness( _sock->destIpAndPort() );
-	getline( liness, _ip, ':' );
-	getline( liness, tempport,  ':' );
-	_port= atoi(tempport.c_str());
+User::User(string name, TCPSocket* sock) :
+		_sock(sock) {
+	string tempPort;
+	istringstream liness(_sock->destIpAndPort());
+	getline(liness, _ip, ':');
+	getline(liness, tempPort, ':');
+	_port = atoi(tempPort.c_str());
 
 	_inChatRoom = false;
 	_inSession = false;
@@ -16,37 +15,34 @@ User::User(string name, TCPSocket* sock)
 	_ChatPartner = NULL;
 }
 
-TCPSocket* User::getSocket()
-{
+User::~User() {
+	delete (_sock);
+}
+
+TCPSocket* User::getSocket() {
 	return _sock;
 }
 
-bool User::inChat()
-{
+bool User::inChat() {
 	return (inChatRoom() || inSession());
 }
 
-bool User::inChatRoom()
-{
+bool User::inChatRoom() {
 	return _inChatRoom;
 }
 
-bool User::inSession()
-{
+bool User::inSession() {
 	return _inSession;
 }
 
-void User::loginUsertoSession(User* partner)
-{
+void User::loginUsertoSession(User* partner) {
 	_inSession = true;
 	_ChatPartner = partner;
 
 }
 
-void User::disconnectFromChatRom(bool fromchatroom)
-{
-	if(inChatRoom())
-	{
+void User::disconnectFromChatRom(bool fromchatroom) {
+	if (inChatRoom()) {
 		if (!fromchatroom)
 			_chatRoom->logOffUser(this);
 		writeCommand(CHAT_ROOM_LEAVED);
@@ -56,14 +52,12 @@ void User::disconnectFromChatRom(bool fromchatroom)
 
 }
 
-void User::loginUserToChatRoom(ChatRoom* logToRoom)
-{
+void User::loginUserToChatRoom(ChatRoom* logToRoom) {
 	_inChatRoom = true;
 	_chatRoom = logToRoom;
 }
 
-bool User::closeSession(bool isinitiating)
-{
+bool User::closeSession(bool isinitiating) {
 	if (!inSession())
 		return true;
 	if (isinitiating)
@@ -75,48 +69,35 @@ bool User::closeSession(bool isinitiating)
 	return true;
 }
 
-int User::readCommand()
-{
+int User::readCommand() {
 	return _sock->readCommand();
 }
-string User::readMsg()
-{
+string User::readMsg() {
 	return _sock->readMsg();
 }
-void User::writeMsg(string msg)
-{
+void User::writeMsg(string msg) {
 	_sock->writeMsg(msg);
 }
-void User::writeCommand(int command)
-{
+void User::writeCommand(int command) {
 	_sock->writeCommand(command);
 }
 
-string User::getDestandport()
-{
+string User::getDestandport() {
 	return _sock->destIpAndPort();
 }
 
-string User::getusername()
-{
+string User::getusername() {
 	return _name;
 }
 
-string User::getIP()
-{
+string User::getIP() {
 	return _ip;
 }
 
-int User::getport()
-{
+int User::getport() {
 	return _port;
 }
 
-ChatRoom* User::getChatRoom()
-{
+ChatRoom* User::getChatRoom() {
 	return _chatRoom;
-}
-
-User::~User() {
-	delete(_sock);
 }

@@ -5,6 +5,14 @@ ChatRoom::ChatRoom(User* owner, string chatRoom) {
 	_chatRoomName = chatRoom;
 }
 
+ChatRoom::~ChatRoom() {
+
+	for(vector<User*>::iterator iter = charRoomUsers.begin(); iter != charRoomUsers.end(); iter++)
+	{
+		(*iter)->disconnectFromChatRom(true);
+	}
+}
+
 void ChatRoom::updateusers()
 {
 	for(vector<User*>::iterator iter = charRoomUsers.begin(); iter != charRoomUsers.end(); iter++)
@@ -112,13 +120,5 @@ bool ChatRoom::logOffUser(User *usertologof)
 	}
 	updateusers();
 	return true;
-}
-
-ChatRoom::~ChatRoom() {
-
-	for(vector<User*>::iterator iter = charRoomUsers.begin(); iter != charRoomUsers.end(); iter++)
-	{
-		(*iter)->disconnectFromChatRom(true);
-	}
 }
 

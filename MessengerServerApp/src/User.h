@@ -1,15 +1,16 @@
 #ifndef USER_H_
 #define USER_H_
 
-#include "TCPSocket.h"
-#include "ChatRoom.h"
-#include "TCPMessengerProtocol.h"
 #include <fstream>
 #include <iostream>
-#include <sstream>
-#include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sstream>
+#include <string>
+
+#include "ChatRoom.h"
+#include "TCPMessengerProtocol.h"
+#include "TCPSocket.h"
 
 class ChatRoom;
 
@@ -25,8 +26,9 @@ class User {
 
 public:
 	User(string name, TCPSocket* basesock);
+	virtual ~User();
 
-	//User related functions
+	// User related functions
 	bool inChat();
 	bool inSession();
 	bool inChatRoom();
@@ -39,15 +41,13 @@ public:
 	int getport();
 	ChatRoom* getChatRoom();
 
-	//SOCKET related functions
+	// Socket related functions
 	TCPSocket* getSocket();
 	string getDestandport();
 	int readCommand();
 	string readMsg();
 	void writeMsg(string msg);
 	void writeCommand(int command);
-
-	virtual ~User();
 };
 
 #endif /* USER_H_ */
