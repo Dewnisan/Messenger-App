@@ -31,16 +31,4 @@ public:
 	void addPeer(TCPSocket* peer);
 };
 
-class Connection: public MThread {
-	LoginManager* registration;
-	TCPSocket * clientSocket;
-	bool running;
-
-public:
-
-	Connection(LoginManager* registration);
-	void run();
-	virtual ~Connection();
-};
-
 #endif /* LOGINMANAGER_H_ */

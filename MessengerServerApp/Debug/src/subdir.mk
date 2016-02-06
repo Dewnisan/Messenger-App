@@ -5,7 +5,8 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/ChatRoom.cpp \
-../src/Login.cpp \
+../src/Listener.cpp \
+../src/LoginManager.cpp \
 ../src/MThread.cpp \
 ../src/MessengerServer.cpp \
 ../src/MultipleTCPSocketsListener.cpp \
@@ -15,7 +16,8 @@ CPP_SRCS += \
 
 OBJS += \
 ./src/ChatRoom.o \
-./src/Login.o \
+./src/Listener.o \
+./src/LoginManager.o \
 ./src/MThread.o \
 ./src/MessengerServer.o \
 ./src/MultipleTCPSocketsListener.o \
@@ -25,7 +27,8 @@ OBJS += \
 
 CPP_DEPS += \
 ./src/ChatRoom.d \
-./src/Login.d \
+./src/Listener.d \
+./src/LoginManager.d \
 ./src/MThread.d \
 ./src/MessengerServer.d \
 ./src/MultipleTCPSocketsListener.d \

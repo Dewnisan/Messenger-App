@@ -129,32 +129,3 @@ void LoginManager::addPeer(TCPSocket* peer) {
 	_peers[peer->destIpAndPort()] = peer;
 }
 
-Connection::Connection(LoginManager* registration) {
-
-	this->registration = registration;
-	running = true;
-	clientSocket = new TCPSocket(MSNGR_PORT);
-	start();
-	cout << "server connection is up!" << endl;
-
-}
-
-// waiting for connection from new peers and adds them to the peer list
-void Connection::run() {
-	TCPSocket* temp;
-	while (running) {
-		temp = clientSocket->listenAndAccept();
-		if (!temp)
-			break;
-		registration->addPeer(temp);
-		cout << "New peer connected: " << temp->destIpAndPort() << endl;
-	}
-	cout << "The connection with server has stopped" << endl;
-}
-
-Connection::~Connection() {
-	running = false;
-	clientSocket->cclose();
-	waitForThread();
-}
-
