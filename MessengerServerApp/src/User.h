@@ -13,8 +13,7 @@
 
 class ChatRoom;
 
-class User{
-
+class User {
 	string _name;
 	string _ip;
 	int _port;

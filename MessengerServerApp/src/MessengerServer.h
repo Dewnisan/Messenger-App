@@ -5,7 +5,6 @@
 #include <string>
 
 #include "MThread.h"
-#include "MultipleTCPSocketsListener.h"
 #include "TCPMessengerProtocol.h"
 #include "TCPSocket.h"
 #include "User.h"
@@ -16,22 +15,16 @@ class MessengerServer: public MThread {
 	bool _running;
 	std::string _pathToUsersFile;
 
-	MultipleTCPSocketsListener* _multipleUserListener;
 	std::map<std::string, User*> _users; // map of logged in users
 	std::map<std::string, ChatRoom*> _chatRooms;
 
 	// Create a session between two users
-	bool createSession(string userToChatWith);
-
-	// Create a session between two users
 	void createSession(User* initiatingUser, User* targetUser);
-
-	map<string, User*>::iterator getBeginIter();
-	map<string, User*>::iterator getEndIter();
 
 public:
 
 	MessengerServer(const std::string& pathToUsersFile);
+	virtual ~MessengerServer();
 
 	// Handles the users requests
 	void run();
@@ -94,8 +87,6 @@ public:
 
 	// login to chat room
 	void loginChatRoom(User* creator);
-
-	virtual ~MessengerServer();
 
 };
 

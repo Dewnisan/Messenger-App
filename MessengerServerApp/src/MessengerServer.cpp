@@ -1,57 +1,76 @@
 #include <string>
 
 #include "MessengerServer.h"
+#include "MultipleTCPSocketsListener.h"
 
 using namespace std;
 
+void MessengerServer::createSession(User* fromUser, User* toUser) {
+	// login the two users
+	toUser->loginUsertoSession(fromUser);
+	fromUser->loginUsertoSession(toUser);
+
+	// send communication details
+	toUser->writeCommand(SESSION_ESTABLISHED);
+	toUser->writeMsg(fromUser->getusername());
+	toUser->writeMsg(fromUser->getIP());
+	toUser->writeCommand(fromUser->getport());
+	toUser->writeCommand(toUser->getport());
+
+	fromUser->writeCommand(SESSION_ESTABLISHED);
+	fromUser->writeMsg(toUser->getusername());
+	fromUser->writeMsg(toUser->getIP());
+	fromUser->writeCommand(toUser->getport());
+	fromUser->writeCommand(fromUser->getport());
+}
+
 MessengerServer::MessengerServer(const std::string& pathToUsersFile) :
-		_running(false), _pathToUsersFile(pathToUsersFile), _multipleUserListener(NULL) {
+		_running(false), _pathToUsersFile(pathToUsersFile) {
 
 	start();
-	cout << "Messnger server is up" << endl;
+	cout << "Messenger server is up" << endl;
+}
+
+MessengerServer::~MessengerServer() {
+	_running = false;
+	waitForThread();
 }
 
 void MessengerServer::run() {
 	_running = true;
-	User* currUser = NULL;
-	_multipleUserListener = NULL;
-	long command = 0;
-	string msg;
+
 	while (_running) {
-		// Create listener
-		if (_multipleUserListener != NULL) {
-			delete (_multipleUserListener);
-		}
-		_multipleUserListener = new MultipleTCPSocketsListener();
+		MultipleTCPSocketsListener multipleSocketsListener;
 
-		// convert User to Socket before adding to list
-		map<string, TCPSocket*> toSocket;
-		for (map<string, User*>::iterator biter = _users.begin();
-				biter != _users.end(); biter++) {
-			toSocket[biter->first] = (biter->second->getSocket());
+		// Convert User to Socket before adding to list
+		map<string, TCPSocket*> sockets;
+		for (map<string, User*>::iterator iter = _users.begin();
+				iter != _users.end(); iter++) {
+			sockets[iter->first] = (iter->second->getSocket());
 		}
 
-		// Add socket
-		_multipleUserListener->addSockets(toSocket);
+		// Add sockets
+		multipleSocketsListener.addSockets(sockets);
 
-		// listen to socket
-		TCPSocket* readyPeer = _multipleUserListener->listenToSocket(2);
-		if (!readyPeer) {
+		// Listen to sockets
+		TCPSocket* readySock = multipleSocketsListener.listenToSocket(2);
+		if (readySock == NULL) {
 			continue;
 		}
 
-		//found user from tcpsocket list
+		// Find matching user
+		User* currUser = NULL;
 		for (map<string, User*>::iterator iter = _users.begin();
 				iter != _users.end(); iter++) {
-			if (readyPeer == iter->second->getSocket()) {
+			if (readySock == iter->second->getSocket()) {
 				currUser = iter->second;
 				break;
 			}
 		}
 
-		// READ command from the user
-		command = currUser->readCommand();
-
+		string msg;
+		// Read command from the user
+		int command = currUser->readCommand();
 		switch (command) {
 		case 0:
 			exitServer(currUser);
@@ -259,27 +278,6 @@ void MessengerServer::exitServer(User* clientName) {
 	_users.erase(clientName->getusername());
 }
 
-// Create a session between two users
-void MessengerServer::createSession(User* fromUser, User* toUser) {
-	// login the two users
-	toUser->loginUsertoSession(fromUser);
-	fromUser->loginUsertoSession(toUser);
-
-	// send communication details
-	toUser->writeCommand(SESSION_ESTABLISHED);
-	toUser->writeMsg(fromUser->getusername());
-	toUser->writeMsg(fromUser->getIP());
-	toUser->writeCommand(fromUser->getport());
-	toUser->writeCommand(toUser->getport());
-
-	fromUser->writeCommand(SESSION_ESTABLISHED);
-	fromUser->writeMsg(toUser->getusername());
-	fromUser->writeMsg(toUser->getIP());
-	fromUser->writeCommand(toUser->getport());
-	fromUser->writeCommand(fromUser->getport());
-
-}
-
 // Create new chat room
 void MessengerServer::createChatRoom(User* creator) {
 	string msg;
@@ -421,9 +419,4 @@ void MessengerServer::readfromChatRoom(User *clientName) {
 		}
 
 	}
-}
-
-MessengerServer::~MessengerServer() {
-	_running = false;
-	waitForThread();
 }
