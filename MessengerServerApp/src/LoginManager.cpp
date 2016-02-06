@@ -1,10 +1,10 @@
-#include "Login.h"
+#include "LoginManager.h"
 
 /*
  * This class handles the login requests and the registration requests
  */
 
-Login::Login(MessengerServer* serverManager)
+LoginManager::LoginManager(MessengerServer* serverManager)
 {
 	listener = NULL;
 	_serverManager = serverManager;
@@ -12,7 +12,7 @@ Login::Login(MessengerServer* serverManager)
 	start();
 }
 
-void Login::run()
+void LoginManager::run()
 {
 	TCPSocket* sockToTalk = NULL;
 	int commandreceved = 0;
@@ -68,12 +68,12 @@ void Login::run()
 	}
 }
 
-void Login::addPeer(TCPSocket* peer)
+void LoginManager::addPeer(TCPSocket* peer)
 {
 	peers[peer->destIpAndPort()] = peer;
 }
 
-Login::~Login()
+LoginManager::~LoginManager()
 {
 	running = false;
 
@@ -85,7 +85,7 @@ Login::~Login()
 }
 
 // search in file for the given username and password.
-bool Login::login(string userName,string password)
+bool LoginManager::login(string userName,string password)
 {
 	string line;
 	fstream loginFile;
@@ -108,7 +108,7 @@ bool Login::login(string userName,string password)
 }
 
 // write to file the new user with his details
-bool Login::signUp(string userName,string password)
+bool LoginManager::signUp(string userName,string password)
 {
 	string line;
 	string userFromFile;
@@ -143,7 +143,7 @@ bool Login::signUp(string userName,string password)
 }
 
 
-Connection::Connection(Login* registration) {
+Connection::Connection(LoginManager* registration) {
 
 	this->registration = registration;
 	running = true;

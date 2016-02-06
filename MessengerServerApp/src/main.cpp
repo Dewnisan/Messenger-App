@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Login.h"
+#include "LoginManager.h"
 #include "MessengerServer.h"
 
 using namespace std;
@@ -23,7 +23,7 @@ int main() {
 	printInstructions();
 
 	MessengerServer messengerServer("connctions.txt"); // listens to all of the sockets who have been connected (in the usersMap)
-	Login registration(&messengerServer); // handles the requests of all peer in the peer map (non-users)
+	LoginManager registration(&messengerServer); // handles the requests of all peer in the peer map (non-users)
 	Connection connection(&registration); // listen to all of the new connections and adds the peers to the peer map.
 
 	bool running = true;
