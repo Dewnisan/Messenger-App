@@ -42,7 +42,7 @@ void MessengerServer::run() {
 	while (_running) {
 		MultipleTCPSocketsListener multipleSocketsListener;
 
-		// Convert User to Socket before adding to list
+		// Convert User to socket before adding to list
 		map<string, TCPSocket*> sockets;
 		for (map<string, User*>::iterator iter = _users.begin();
 				iter != _users.end(); iter++) {

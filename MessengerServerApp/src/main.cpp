@@ -20,7 +20,7 @@ void printInstructions() {
 }
 
 int main() {
-	cout << "Welcome to TCP messenger Server" << endl;
+	cout << "Welcome to messenger server" << endl;
 	printInstructions();
 
 	MessengerServer messengerServer("connctions.txt"); // Listens to all of the users which have been connected
@@ -31,6 +31,7 @@ int main() {
 	while (running) {
 		string command;
 		cin >> command;
+
 		if (command == "lcu") { // List Connected Users
 			messengerServer.getListConnectedUsers();
 		} else if (command == "ls") { // List of all open sessions
@@ -53,6 +54,6 @@ int main() {
 		}
 	}
 
-	cout << "messenger was closed" << endl;
+	cout << "Messenger was closed" << endl;
 	return 0;
 }
