@@ -1,6 +1,6 @@
-#include "ClientManager.h"
+#include "MessengerClient.h"
 
-ClientManager::ClientManager() {
+MessengerClient::MessengerClient() {
 	login = false;
 	sessionOn = false;
 	roomOn = false;
@@ -12,7 +12,7 @@ ClientManager::ClientManager() {
 /**
  * client receive loop, activated once a login to the server is established
  */
-void ClientManager::run()
+void MessengerClient::run()
 {
 	string parameter1;
 	int partnerPort;
@@ -42,7 +42,7 @@ void ClientManager::run()
 				cout<<"Session has been denied because "<<parameter1 <<endl;
 				break;
 			case SESSION_CLOSED:
-				udpChatSideB.Clean();
+				udpChatSideB.clean();
 				sessionOn = false;
 				delete(clientLinker);
 				cout<<"the session is now terminated"<<endl;
@@ -92,7 +92,7 @@ void ClientManager::run()
 }
 
 // connect to the given server ip and port
-bool ClientManager::connectToServer(string ip, int port)
+bool MessengerClient::connectToServer(string ip, int port)
 {
 	if(serverSocket != NULL)
 		return false;
@@ -102,7 +102,7 @@ bool ClientManager::connectToServer(string ip, int port)
 }
 
 // register a new user to server with a given username and password
-void ClientManager::sign(string username,string password,int cmd)
+void MessengerClient::sign(string username,string password,int cmd)
 {
 	if (login)
 	{
@@ -134,7 +134,7 @@ void ClientManager::sign(string username,string password,int cmd)
 }
 
 // login to server with a given username and password
-void ClientManager::log(string username,string password,int cmd)
+void MessengerClient::log(string username,string password,int cmd)
 {
 	if (login)
 	{
@@ -173,7 +173,7 @@ void ClientManager::log(string username,string password,int cmd)
 }
 
 // open session with the given peer name
-bool ClientManager::openSession(string partnerName)
+bool MessengerClient::openSession(string partnerName)
 {
 	if (!serverSocket || !login)
 	{
@@ -197,7 +197,7 @@ bool ClientManager::openSession(string partnerName)
 }
 
 // print the current status of the client
-void ClientManager::printCurrentInfo()
+void MessengerClient::printCurrentInfo()
 {
 	if (serverSocket)
 		cout<< "Connected to server "<<endl;
@@ -218,7 +218,7 @@ void ClientManager::printCurrentInfo()
 }
 
 // sending UDP message to specific user or to all the users in a room.
-bool ClientManager::sendMsg(string msg)
+bool MessengerClient::sendMsg(string msg)
 {
 	if(sessionOn)
 	{
@@ -241,7 +241,7 @@ bool ClientManager::sendMsg(string msg)
 }
 
 // open session in the given room name
-bool ClientManager::createChatRoom(string name)
+bool MessengerClient::createChatRoom(string name)
 {
 	if(!serverSocket || !login || isInChat())
 		return false;
@@ -250,7 +250,7 @@ bool ClientManager::createChatRoom(string name)
 	return true;
 }
 
-bool ClientManager::loginToChatRoom(string roomName)
+bool MessengerClient::loginToChatRoom(string roomName)
 {
 	if(isInChat() || !serverSocket || !login)
 		return false;
@@ -260,7 +260,7 @@ bool ClientManager::loginToChatRoom(string roomName)
 }
 
 // print all of the connected users after received from the server
-void ClientManager::printConnectedUsers()
+void MessengerClient::printConnectedUsers()
 {
 	int i;
 	int numOfUsers;
@@ -276,7 +276,7 @@ void ClientManager::printConnectedUsers()
 }
 
 // print the list of the users from the file
-void ClientManager::printListUsers()
+void MessengerClient::printListUsers()
 {
 	int i;
 	int numOfUsers;
@@ -292,7 +292,7 @@ void ClientManager::printListUsers()
 }
 
 // send to the server request of connected users
-void ClientManager::printConnectedUsersRequest()
+void MessengerClient::printConnectedUsersRequest()
 {
 	if (!serverSocket || !login)
 	{
@@ -303,7 +303,7 @@ void ClientManager::printConnectedUsersRequest()
 }
 
 // send to the server request of list of the users from the file
-void ClientManager::listUsers()
+void MessengerClient::listUsers()
 {
 	if (!serverSocket || !login)
 	{
@@ -314,7 +314,7 @@ void ClientManager::listUsers()
 }
 
 // send to the server request of room list
-void ClientManager::RoomsList()
+void MessengerClient::RoomsList()
 {
 	if (!serverSocket || !login)
 	{
@@ -325,7 +325,7 @@ void ClientManager::RoomsList()
 }
 
 // send to the server request of all the users in a room (given by it's name)
-void ClientManager::listConnectedUsersInRoom(string roomName)
+void MessengerClient::listConnectedUsersInRoom(string roomName)
 {
 	if (!serverSocket || !login)
 	{
@@ -337,7 +337,7 @@ void ClientManager::listConnectedUsersInRoom(string roomName)
 }
 
 // delete the room by it's name (only the owner of the room can delete it)
-bool ClientManager::deleteChatRoom(string name)
+bool MessengerClient::deleteChatRoom(string name)
 {
 	if (!serverSocket || !login)
 	{
@@ -350,7 +350,7 @@ bool ClientManager::deleteChatRoom(string name)
 }
 
 // disconnect the open session / exit from a room
-bool ClientManager::exitRoomOrCloseSession()
+bool MessengerClient::exitRoomOrCloseSession()
 {
 	if (roomOn)
 	{
@@ -370,7 +370,7 @@ bool ClientManager::exitRoomOrCloseSession()
 }
 
 // adds room mate vector of the users
-void ClientManager::addRoomUser(string roomate, string IP, int port)
+void MessengerClient::addRoomUser(string roomate, string IP, int port)
 {
 	ChatSideB *temp= new ChatSideB();
 	temp->_sideB_name =roomate;
@@ -380,7 +380,7 @@ void ClientManager::addRoomUser(string roomate, string IP, int port)
 }
 
 // update the user details after leaving a room
-void ClientManager::chatRoomLeaved()
+void MessengerClient::chatRoomLeaved()
 {
 	roomOn = false;
 	clearRoomUsers();
@@ -388,7 +388,7 @@ void ClientManager::chatRoomLeaved()
 }
 
 // clear the vector of the users - (after exiting a room)
-void ClientManager::clearRoomUsers()
+void MessengerClient::clearRoomUsers()
 {
 	std::vector<ChatSideB*>::iterator iter = chatUsers.begin();
 	std::vector<ChatSideB*>::iterator enditer = chatUsers.end();
@@ -402,17 +402,17 @@ void ClientManager::clearRoomUsers()
 }
 
 // return true if the user is in a session or in a chat. false otherwise
-bool ClientManager::isInChat()
+bool MessengerClient::isInChat()
 {
 	return roomOn || sessionOn;
 }
 
-bool ClientManager::isConnectedToServer() const {
+bool MessengerClient::isConnectedToServer() const {
 	return connectedToServer;
 }
 
 // disconnect from the server and exit
-void ClientManager::exitAll()
+void MessengerClient::exitAll()
 {
 	exitRoomOrCloseSession();
 	serverSocket->writeCommand(EXIT);
@@ -424,7 +424,7 @@ void ClientManager::exitAll()
 }
 
 // print the list rooms
-void ClientManager::printRoomsList()
+void MessengerClient::printRoomsList()
 {
 	int numOfRooms;
 	numOfRooms = serverSocket->readCommand();
@@ -442,7 +442,7 @@ void ClientManager::printRoomsList()
 }
 
 // update the rooms info
-void ClientManager::chatRoomUpdate()
+void MessengerClient::chatRoomUpdate()
 {
 	roomOn = true;
 	clearRoomUsers();
@@ -458,6 +458,6 @@ void ClientManager::chatRoomUpdate()
 	cout<<"Chat room "<< chatRoomName<<" updated"<<endl;
 }
 
-ClientManager::~ClientManager() {
+MessengerClient::~MessengerClient() {
 	running = false;
 }

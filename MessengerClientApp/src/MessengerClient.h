@@ -7,21 +7,20 @@
 #include "TCPSocket.h"
 #include "TCPMessengerProtocol.h"
 
-class ChatSideB
-{
+class ChatSideB {
 public:
 	string _sideB_name;
 	string _IP;
 	int _port;
-	void Clean()
-	{
+
+	void clean() {
 		_sideB_name.clear();
 		_IP.clear();
 		_port = 0;
 	}
 };
 
-class ClientManager : public MThread{
+class MessengerClient: public MThread {
 
 	TCPSocket* serverSocket;
 	bool running;
@@ -45,16 +44,16 @@ class ClientManager : public MThread{
 	void addRoomUser(string roomate, string IP, int port);
 
 public:
-	ClientManager();
+	MessengerClient();
 
 	// connect to the given server ip and port
-	bool connectToServer(string ip,int port);
+	bool connectToServer(string ip, int port);
 
 	// register a new user to server with a given username and password
-	void sign(string username,string password,int cmd);
+	void sign(string username, string password, int cmd);
 
 	// login to server with a given username and password
-	void log(string username,string password,int cmd);
+	void log(string username, string password, int cmd);
 
 	// open session with the given peer name
 	bool openSession(string chatSideBName);
@@ -112,7 +111,7 @@ public:
 
 	bool isConnectedToServer() const;
 
-	virtual ~ClientManager();
+	virtual ~MessengerClient();
 };
 
 #endif /* CLIENTMANAGER_H_ */

@@ -9,6 +9,7 @@
 class ClientLinker: public MThread {
 	UDPSocket clientSocket;
 	bool running;
+
 public:
 	void send(string msg,string IP, int port);
 	ClientLinker(int port);
