@@ -12,9 +12,9 @@ ClientLinker::ClientLinker(int port):_clientSocket(port)
  */
 void ClientLinker::run()
 {
-	running = true;
+	_running = true;
 	char buf[300];
-	while(running)
+	while(_running)
 	{
 		for(int i = 0;i<300;i++,buf[i] = 0);
 		_clientSocket.recv(buf,300);
@@ -28,7 +28,7 @@ void ClientLinker::send(string msg,string IP, int port)
 }
 
 ClientLinker::~ClientLinker() {
-	running = false;
+	_running = false;
 	_clientSocket.cclose();
 	waitForThread();
 }

@@ -31,7 +31,7 @@ class MessengerClient: public MThread {
 	ClientLinker *_clientLinker;
 	bool _sessionOn;
 	bool _roomOn;
-	bool _login;
+	bool _loggedIn;
 	bool _connectedToServer;
 
 	// client receive loop, activated once a login to the server is established
@@ -46,14 +46,14 @@ class MessengerClient: public MThread {
 public:
 	MessengerClient();
 
-	// connect to the given server ip and port
+	// Connect to the given server ip and port
 	bool connectToServer(string ip, int port);
 
-	// register a new user to server with a given username and password
-	void sign(string username, string password, int cmd);
+	// Register a new user to server with a given username and password
+	void signup(string username, string password, int cmd);
 
-	// login to server with a given username and password
-	void log(string username, string password, int cmd);
+	// Login to server with a given username and password
+	void login(string username, string password, int cmd);
 
 	// open session with the given peer name
 	bool openSession(string chatSideBName);

@@ -1,7 +1,7 @@
 #include "MessengerClient.h"
 
 MessengerClient::MessengerClient() {
-	_login = false;
+	_loggedIn = false;
 	_sessionOn = false;
 	_roomOn = false;
 	_connectedToServer = false;
@@ -89,18 +89,19 @@ void MessengerClient::run() {
 	}
 }
 
-// connect to the given server ip and port
 bool MessengerClient::connectToServer(string ip, int port) {
-	if (_serverSocket != NULL)
+	if (_serverSocket != NULL) {
 		return false;
+	}
+
 	_serverSocket = new TCPSocket(ip, port);
 	_connectedToServer = true;
+
 	return true;
 }
 
-// register a new user to server with a given username and password
-void MessengerClient::sign(string username, string password, int cmd) {
-	if (_login) {
+void MessengerClient::signup(string username, string password, int cmd) {
+	if (_loggedIn) {
 		cout << "You cannot register while you logged in" << endl;
 		return;
 	}
@@ -112,9 +113,9 @@ void MessengerClient::sign(string username, string password, int cmd) {
 		_serverSocket->writeMsg(password);
 		response = _serverSocket->readCommand();
 
-		if (response == SIGNUP_REQUEST_APPROVED) {
+		if (response == REGISTRATION_REQUEST_APPROVED) {
 			cout << "signed up was successful with the user: " << username << endl;
-		} else if (cmd == SIGNUP_REQUEST_DENIED) {
+		} else if (cmd == REGISTRATION_REQUEST_DENIED) {
 			cout << "you failed to sign up" << endl;
 		}
 	} else {
@@ -123,14 +124,14 @@ void MessengerClient::sign(string username, string password, int cmd) {
 }
 
 // login to server with a given username and password
-void MessengerClient::log(string username, string password, int cmd) {
-	if (_login) {
+void MessengerClient::login(string username, string password, int cmd) {
+	if (_loggedIn) {
 		cout << "login failed - you are already logged in" << endl;
 		return;
 	}
 
 	int response;
-	if (_serverSocket) {
+	if (_serverSocket != NULL) {
 		_serverSocket->writeCommand(cmd);
 		_serverSocket->writeMsg(username);
 		_serverSocket->writeMsg(password);
@@ -138,7 +139,7 @@ void MessengerClient::log(string username, string password, int cmd) {
 
 		if (response == LOGIN_REQUEST_APPROVED) {
 			_username = username;
-			_login = true;
+			_loggedIn = true;
 			start();
 			cout << "you were logged in as " + username << endl;
 		} else if (response == LOGIN_REQUEST_WRONG_DETAILS) {
@@ -151,33 +152,34 @@ void MessengerClient::log(string username, string password, int cmd) {
 	}
 }
 
-// open session with the given peer name
 bool MessengerClient::openSession(string partnerName) {
-	if (!_serverSocket || !_login) {
+	if (_serverSocket == NULL || !_loggedIn) {
 		cout << "You are not connected/logged in" << endl;
 		return false;
 	}
+
 	if (isInChat()) {
 		cout << "You are already in a session" << endl;
 		return false;
 	}
+
 	if (partnerName == _username) {
 		cout << "You can't open session with yourself" << endl;
 		return false;
 	}
+
 	_serverSocket->writeCommand(SESSION_CREATE);
 	_serverSocket->writeMsg(partnerName);
 
 	return true;
 }
 
-// print the current status of the client
 void MessengerClient::printCurrentInfo() {
 	if (_serverSocket)
 		cout << "Connected to server " << endl;
 	else
 		cout << "NOT Connected to server " << endl;
-	if (_login)
+	if (_loggedIn)
 		cout << "Logged in as  " << _username << endl;
 	else
 		cout << "NOT logged in " << endl;
@@ -211,7 +213,7 @@ bool MessengerClient::sendMsg(string msg) {
 
 // open session in the given room name
 bool MessengerClient::createChatRoom(string name) {
-	if (!_serverSocket || !_login || isInChat())
+	if (!_serverSocket || !_loggedIn || isInChat())
 		return false;
 	_serverSocket->writeCommand(CHAT_ROOM_CREATE);
 	_serverSocket->writeMsg(name);
@@ -219,7 +221,7 @@ bool MessengerClient::createChatRoom(string name) {
 }
 
 bool MessengerClient::loginToChatRoom(string roomName) {
-	if (isInChat() || !_serverSocket || !_login)
+	if (isInChat() || !_serverSocket || !_loggedIn)
 		return false;
 	_serverSocket->writeCommand(CHAT_ROOM_LOGIN);
 	_serverSocket->writeMsg(roomName);
@@ -254,7 +256,7 @@ void MessengerClient::printListUsers() {
 
 // send to the server request of connected users
 void MessengerClient::printConnectedUsersRequest() {
-	if (!_serverSocket || !_login) {
+	if (!_serverSocket || !_loggedIn) {
 		cout << "You are not connected or not logged in" << endl;
 		return;
 	}
@@ -263,7 +265,7 @@ void MessengerClient::printConnectedUsersRequest() {
 
 // send to the server request of list of the users from the file
 void MessengerClient::listUsers() {
-	if (!_serverSocket || !_login) {
+	if (!_serverSocket || !_loggedIn) {
 		cout << "You are not connected or not logged in" << endl;
 		return;
 	}
@@ -272,7 +274,7 @@ void MessengerClient::listUsers() {
 
 // send to the server request of room list
 void MessengerClient::RoomsList() {
-	if (!_serverSocket || !_login) {
+	if (!_serverSocket || !_loggedIn) {
 		cout << "you are not connected or not logged in" << endl;
 		return;
 	}
@@ -281,7 +283,7 @@ void MessengerClient::RoomsList() {
 
 // send to the server request of all the users in a room (given by it's name)
 void MessengerClient::listConnectedUsersInRoom(string roomName) {
-	if (!_serverSocket || !_login) {
+	if (!_serverSocket || !_loggedIn) {
 		cout << "you are not connected or not logged in" << endl;
 		return;
 	}
@@ -291,7 +293,7 @@ void MessengerClient::listConnectedUsersInRoom(string roomName) {
 
 // delete the room by it's name (only the owner of the room can delete it)
 bool MessengerClient::deleteChatRoom(string name) {
-	if (!_serverSocket || !_login) {
+	if (!_serverSocket || !_loggedIn) {
 		cout << "you are not connected/logged in" << endl;
 		return false;
 	}
@@ -357,7 +359,7 @@ void MessengerClient::exitAll() {
 	_serverSocket->writeCommand(EXIT);
 	_username.clear();
 	_running = false;
-	_login = false;
+	_loggedIn = false;
 	_connectedToServer = false;
 	_serverSocket = NULL;
 }

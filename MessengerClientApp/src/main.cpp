@@ -36,23 +36,22 @@ int main() {
 	bool running = true;
 	while (running) {
 		string command, parameter1, parameter2, answer;
-
 		cin >> command;
 		if (command == "c") {
 			cin >> parameter1; // Server IP
 			if (clientManager.connectToServer(parameter1, MSNGR_PORT)) {
-				cout << "connected to: " << parameter1 << endl;
+				cout << "Connected to: " << parameter1 << endl;
 			} else {
-				cout << "connection failed - already connected" << endl;
+				cout << "Connection failed - already connected" << endl;
 			}
 		} else if (command == "login") {
 			cin >> parameter1; // Username
 			cin >> parameter2; // Password
-			clientManager.log(parameter1, parameter2, LOGIN_REQUEST);
+			clientManager.login(parameter1, parameter2, LOGIN_REQUEST);
 		} else if (command == "register") {
 			cin >> parameter1; // Username
 			cin >> parameter2; // Password
-			clientManager.sign(parameter1, parameter2, SIGNUP_REQUEST);
+			clientManager.signup(parameter1, parameter2, REGISTRATION_REQUEST);
 		} else if (command == "o") {
 			cin >> parameter1; // Username to open session with
 			clientManager.openSession(parameter1);
