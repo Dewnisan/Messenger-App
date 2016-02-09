@@ -12,8 +12,7 @@
 
 using namespace std;
 
-
-class MultipleTCPSocketsListener{
+class MultipleTCPSocketsListener {
 	typedef vector<TCPSocket*> tSocketsContainer;
 	tSocketsContainer sockets;
 
@@ -32,8 +31,7 @@ public:
 	 * This method checks to see if any of the previous given sockets are ready for reading
 	 * It returns one of the Sockets that are ready.
 	 */
-	TCPSocket* listenToSocket(int timeout=0);
+	TCPSocket* listenToSocket(int timeout = 0);
 };
-
 
 #endif /* MULTIPLETCPSOCKETSLISTENER_H_ */

@@ -8,8 +8,7 @@
 
 #include <pthread.h>
 
-
-class MThread{
+class MThread {
 public:
 	pthread_t threadId;
 
@@ -19,6 +18,5 @@ public:
 	void waitForThread();
 	virtual ~MThread();
 };
-
 
 #endif /* MTHREAD_H_ */

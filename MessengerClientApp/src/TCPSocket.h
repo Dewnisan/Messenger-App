@@ -19,7 +19,7 @@
 
 using namespace std;
 
-class TCPSocket{
+class TCPSocket {
 private:
 	struct sockaddr_in serverAddr;
 	struct sockaddr_in peerAddr;
@@ -28,7 +28,7 @@ private:
 	/**
 	 * private constructor to create a secondary server socket to communicate with a remote peer
 	 */
-	TCPSocket(int connected_sock,struct sockaddr_in serverAddr,struct sockaddr_in peerAddr);
+	TCPSocket(int connected_sock, struct sockaddr_in serverAddr, struct sockaddr_in peerAddr);
 	/**
 	 * Read from socket into the given buffer up to the buffer given length.
 	 * return the number of bytes read
@@ -55,7 +55,6 @@ public:
 	 * Perform listen and accept on server socket
 	 */
 	TCPSocket* listenAndAccept();
-
 
 	/**
 	 * close the socket and free all resources

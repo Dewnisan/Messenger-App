@@ -13,9 +13,8 @@
 
 using namespace std;
 
-class UDPSocket{
-private:
-	struct sockaddr_in  s_in;
+class UDPSocket {
+	struct sockaddr_in s_in;
 	struct sockaddr_in from;
 	unsigned int fsize;
 	int socket_fd;

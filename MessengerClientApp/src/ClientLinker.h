@@ -7,8 +7,8 @@
 #include "UDPSocket.h"
 
 class ClientLinker: public MThread {
-	UDPSocket clientSocket;
-	bool running;
+	UDPSocket _clientSocket;
+	bool _running;
 
 public:
 	void send(string msg,string IP, int port);

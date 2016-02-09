@@ -1,6 +1,6 @@
 #include "ClientLinker.h"
 
-ClientLinker::ClientLinker(int port):clientSocket(port)
+ClientLinker::ClientLinker(int port):_clientSocket(port)
 {
 	start();
 }
@@ -17,18 +17,18 @@ void ClientLinker::run()
 	while(running)
 	{
 		for(int i = 0;i<300;i++,buf[i] = 0);
-		clientSocket.recv(buf,300);
+		_clientSocket.recv(buf,300);
 		cout<<buf<<endl;
 	}
 }
 
 void ClientLinker::send(string msg,string IP, int port)
 {
-	clientSocket.sendTo(msg,IP,port);
+	_clientSocket.sendTo(msg,IP,port);
 }
 
 ClientLinker::~ClientLinker() {
 	running = false;
-	clientSocket.cclose();
+	_clientSocket.cclose();
 	waitForThread();
 }

@@ -22,17 +22,17 @@ public:
 
 class MessengerClient: public MThread {
 
-	TCPSocket* serverSocket;
-	bool running;
-	ChatSideB udpChatSideB;
+	TCPSocket* _serverSocket;
+	bool _running;
+	ChatSideB _udpChatSideB;
 	string _username;
-	vector<ChatSideB*> chatUsers;
-	string chatRoomName;
-	ClientLinker *clientLinker;
-	bool sessionOn;
-	bool roomOn;
-	bool login;
-	bool connectedToServer;
+	vector<ChatSideB*> _chatUsers;
+	string _chatRoomName;
+	ClientLinker *_clientLinker;
+	bool _sessionOn;
+	bool _roomOn;
+	bool _login;
+	bool _connectedToServer;
 
 	// client receive loop, activated once a login to the server is established
 	void run();

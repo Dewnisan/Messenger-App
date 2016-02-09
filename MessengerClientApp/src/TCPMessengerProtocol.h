@@ -35,7 +35,6 @@
 #define CHAT_ROOM_UPDATED			27
 #define CHAT_ROOM_UNCLOSED			28
 
-
 //LOGIN
 #define LOGIN_REQUEST				30
 #define SIGNUP_REQUEST				31
