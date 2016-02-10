@@ -1,5 +1,7 @@
 #include "MessengerClient.h"
 
+#include "TCPSocket.h"
+
 MessengerClient::MessengerClient() {
 	_loggedIn = false;
 	_sessionOn = false;
@@ -20,23 +22,25 @@ void MessengerClient::run() {
 	_running = true;
 
 	while (_running) {
-		command = _serverSocket->readCommand();
-		if (!command)
+		command = MessengerClient::readCommandFromPeer(_serverSocket);
+		if (command == 0) {
 			continue;
+		}
+
 		switch (command) {
 		case SESSION_ESTABLISHED:
-			_udpChatSideB._sideB_name = _serverSocket->readMsg();
-			_udpChatSideB._IP = _serverSocket->readMsg();
-			_udpChatSideB._port = _serverSocket->readCommand();
+			_udpChatSideB._sideB_name = MessengerClient::readDataFromPeer(_serverSocket);
+			_udpChatSideB._IP = MessengerClient::readDataFromPeer(_serverSocket);
+			_udpChatSideB._port = MessengerClient::readCommandFromPeer(_serverSocket);
 
-			partnerPort = _serverSocket->readCommand();
+			partnerPort = MessengerClient::readCommandFromPeer(_serverSocket);
 			_clientLinker = new ClientLinker(partnerPort);
 			_sessionOn = true;
 
 			cout << "You are in direct connection with  " << _udpChatSideB._sideB_name << endl;
 			break;
 		case SESSION_CREATE_REFUSED:
-			parameter1 = _serverSocket->readMsg();
+			parameter1 = MessengerClient::readDataFromPeer(_serverSocket);
 			cout << "Session has been denied because " << parameter1 << endl;
 			break;
 		case SESSION_CLOSED:
@@ -46,7 +50,7 @@ void MessengerClient::run() {
 			cout << "the session is now terminated" << endl;
 			break;
 		case CHAT_ROOM_CREATE_DENIED:
-			parameter1 = _serverSocket->readMsg();
+			parameter1 = MessengerClient::readDataFromPeer(_serverSocket);
 			cout << "room cannot be opened due to: " << parameter1 << endl;
 			break;
 		case CHAT_ROOM_CREATED:
@@ -57,13 +61,13 @@ void MessengerClient::run() {
 			cout << "your user is out of the room" << endl;
 			break;
 		case CHAT_ROOM_LOGED_IN:
-			partnerPort = _serverSocket->readCommand(); // UDP listen port
+			partnerPort = MessengerClient::readCommandFromPeer(_serverSocket); // UDP listen port
 			_clientLinker = new ClientLinker(partnerPort);
 			_roomOn = true;
 			cout << "You have joined to the room" << endl;
 			break;
 		case CHAT_ROOM_LOGED_IN_DENIED:
-			cout << _serverSocket->readMsg() << endl;
+			cout << MessengerClient::readDataFromPeer(_serverSocket) << endl;
 			break;
 		case CHAT_ROOM_UPDATED:
 			chatRoomUpdate();
@@ -108,11 +112,11 @@ void MessengerClient::signup(string username, string password, int cmd) {
 
 	int response;
 	if (_serverSocket) {
-		_serverSocket->writeCommand(cmd);
-		_serverSocket->writeMsg(username);
-		_serverSocket->writeMsg(password);
-		response = _serverSocket->readCommand();
+		MessengerClient::sendCommandToPeer(_serverSocket, cmd);
+		MessengerClient::sendDataToPeer(_serverSocket, username);
+		MessengerClient::sendDataToPeer(_serverSocket, password);
 
+		response = MessengerClient::readCommandFromPeer(_serverSocket);
 		if (response == REGISTRATION_REQUEST_APPROVED) {
 			cout << "signed up was successful with the user: " << username << endl;
 		} else if (cmd == REGISTRATION_REQUEST_DENIED) {
@@ -132,11 +136,11 @@ void MessengerClient::login(string username, string password, int cmd) {
 
 	int response;
 	if (_serverSocket != NULL) {
-		_serverSocket->writeCommand(cmd);
-		_serverSocket->writeMsg(username);
-		_serverSocket->writeMsg(password);
-		response = _serverSocket->readCommand();
+		MessengerClient::sendCommandToPeer(_serverSocket, cmd);
+		MessengerClient::sendDataToPeer(_serverSocket, username);
+		MessengerClient::sendDataToPeer(_serverSocket, password);
 
+		response = MessengerClient::readCommandFromPeer(_serverSocket);
 		if (response == LOGIN_REQUEST_APPROVED) {
 			_username = username;
 			_loggedIn = true;
@@ -168,8 +172,8 @@ bool MessengerClient::openSession(string partnerName) {
 		return false;
 	}
 
-	_serverSocket->writeCommand(SESSION_CREATE);
-	_serverSocket->writeMsg(partnerName);
+	MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CREATE);
+	MessengerClient::sendDataToPeer(_serverSocket, partnerName);
 
 	return true;
 }
@@ -213,18 +217,24 @@ bool MessengerClient::sendMsg(string msg) {
 
 // open session in the given room name
 bool MessengerClient::createChatRoom(string name) {
-	if (!_serverSocket || !_loggedIn || isInChat())
+	if (!_serverSocket || !_loggedIn || isInChat()) {
 		return false;
-	_serverSocket->writeCommand(CHAT_ROOM_CREATE);
-	_serverSocket->writeMsg(name);
+	}
+
+	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_CREATE);
+	MessengerClient::sendDataToPeer(_serverSocket, name);
+
 	return true;
 }
 
 bool MessengerClient::loginToChatRoom(string roomName) {
-	if (isInChat() || !_serverSocket || !_loggedIn)
+	if (isInChat() || !_serverSocket || !_loggedIn) {
 		return false;
-	_serverSocket->writeCommand(CHAT_ROOM_LOGIN);
-	_serverSocket->writeMsg(roomName);
+	}
+
+	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_LOGIN);
+	MessengerClient::sendDataToPeer(_serverSocket, roomName);
+
 	return true;
 }
 
@@ -232,9 +242,9 @@ bool MessengerClient::loginToChatRoom(string roomName) {
 void MessengerClient::printConnectedUsers() {
 	int i;
 	int numOfUsers;
-	numOfUsers = _serverSocket->readCommand();
+	numOfUsers = MessengerClient::readCommandFromPeer(_serverSocket);
 	for (i = 0; i < numOfUsers; i++) {
-		cout << " user: " << _serverSocket->readMsg() << endl;
+		cout << " user: " << MessengerClient::readDataFromPeer(_serverSocket) << endl;
 	}
 	if (i == 0) {
 		cout << "no one is connected" << endl;
@@ -245,9 +255,9 @@ void MessengerClient::printConnectedUsers() {
 void MessengerClient::printListUsers() {
 	int i;
 	int numOfUsers;
-	numOfUsers = _serverSocket->readCommand();
+	numOfUsers = MessengerClient::readCommandFromPeer(_serverSocket);
 	for (i = 0; i < numOfUsers; i++) {
-		cout << " user: " << _serverSocket->readMsg() << endl;
+		cout << " user: " << MessengerClient::readDataFromPeer(_serverSocket) << endl;
 	}
 	if (i == 0) {
 		cout << "no one is connected" << endl;
@@ -260,7 +270,8 @@ void MessengerClient::printConnectedUsersRequest() {
 		cout << "You are not connected or not logged in" << endl;
 		return;
 	}
-	_serverSocket->writeCommand(LIST_CONNECTED_USERS);
+
+	MessengerClient::sendCommandToPeer(_serverSocket, LIST_CONNECTED_USERS);
 }
 
 // send to the server request of list of the users from the file
@@ -269,7 +280,8 @@ void MessengerClient::listUsers() {
 		cout << "You are not connected or not logged in" << endl;
 		return;
 	}
-	_serverSocket->writeCommand(LIST_USERS);
+
+	MessengerClient::sendCommandToPeer(_serverSocket, LIST_USERS);
 }
 
 // send to the server request of room list
@@ -278,7 +290,8 @@ void MessengerClient::RoomsList() {
 		cout << "you are not connected or not logged in" << endl;
 		return;
 	}
-	_serverSocket->writeCommand(LIST_ROOMS);
+
+	MessengerClient::sendCommandToPeer(_serverSocket, LIST_ROOMS);
 }
 
 // send to the server request of all the users in a room (given by it's name)
@@ -287,8 +300,9 @@ void MessengerClient::listConnectedUsersInRoom(string roomName) {
 		cout << "you are not connected or not logged in" << endl;
 		return;
 	}
-	_serverSocket->writeCommand(LIST_CONNECTED_USERS_IN_ROOM);
-	_serverSocket->writeMsg(roomName);
+
+	MessengerClient::sendCommandToPeer(_serverSocket, LIST_CONNECTED_USERS_IN_ROOM);
+	MessengerClient::sendDataToPeer(_serverSocket, roomName);
 }
 
 // delete the room by it's name (only the owner of the room can delete it)
@@ -297,17 +311,19 @@ bool MessengerClient::deleteChatRoom(string name) {
 		cout << "you are not connected/logged in" << endl;
 		return false;
 	}
-	_serverSocket->writeCommand(CHAT_ROOM_CLOSE);
-	_serverSocket->writeMsg(name);
+
+	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_CLOSE);
+	MessengerClient::sendDataToPeer(_serverSocket, name);
+
 	return true;
 }
 
 // disconnect the open session / exit from a room
 bool MessengerClient::exitRoomOrCloseSession() {
 	if (_roomOn) {
-		_serverSocket->writeCommand(CHAT_ROOM_EXIT);
+		MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_EXIT);
 	} else if (_sessionOn) {
-		_serverSocket->writeCommand(SESSION_CLOSE);
+		MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CLOSE);
 	} else {
 		return false;
 	}
@@ -341,6 +357,7 @@ void MessengerClient::clearRoomUsers() {
 		delete (*iter);
 		iter++;
 	}
+
 	_chatUsers.clear();
 }
 
@@ -356,7 +373,9 @@ bool MessengerClient::isConnectedToServer() const {
 // disconnect from the server and exit
 void MessengerClient::exitAll() {
 	exitRoomOrCloseSession();
-	_serverSocket->writeCommand(EXIT);
+
+	MessengerClient::sendCommandToPeer(_serverSocket, EXIT);
+
 	_username.clear();
 	_running = false;
 	_loggedIn = false;
@@ -367,12 +386,12 @@ void MessengerClient::exitAll() {
 // print the list rooms
 void MessengerClient::printRoomsList() {
 	int numOfRooms;
-	numOfRooms = _serverSocket->readCommand();
+	numOfRooms = MessengerClient::readCommandFromPeer(_serverSocket);
 
 	if (numOfRooms > 0) {
 		cout << "Rooms: " << endl;
 		for (int i = 0; i < numOfRooms; i++) {
-			cout << "Room name: " << _serverSocket->readMsg() << endl;
+			cout << "Room name: " << MessengerClient::readDataFromPeer(_serverSocket) << endl;
 		}
 	} else
 		cout << "There are no rooms yet" << endl;
@@ -382,13 +401,14 @@ void MessengerClient::printRoomsList() {
 void MessengerClient::chatRoomUpdate() {
 	_roomOn = true;
 	clearRoomUsers();
-	_chatRoomName = _serverSocket->readMsg();
-	int countofmemebers = _serverSocket->readCommand();
+	_chatRoomName = MessengerClient::readDataFromPeer(_serverSocket);
+	int countofmemebers = MessengerClient::readCommandFromPeer(_serverSocket);
 	for (int i = 0; i < countofmemebers; i++) {
-		string user = _serverSocket->readMsg();
-		string ip = _serverSocket->readMsg();
-		int port = _serverSocket->readCommand();
+		string user = MessengerClient::readDataFromPeer(_serverSocket);
+		string ip = MessengerClient::readDataFromPeer(_serverSocket);
+		int port = MessengerClient::readCommandFromPeer(_serverSocket);
 		addRoomUser(user, ip, port);
 	}
+
 	cout << "Chat room " << _chatRoomName << " updated" << endl;
 }

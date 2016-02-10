@@ -1,11 +1,13 @@
 #ifndef CLIENTMANAGER_H_
 #define CLIENTMANAGER_H_
 
-#include "MThread.h"
-#include "ClientLinker.h"
 #include <vector>
-#include "TCPSocket.h"
+
+#include "ClientLinker.h"
+#include "MessengerEntity.h"
+#include "MThread.h"
 #include "TCPMessengerProtocol.h"
+#include "TCPSocket.h"
 
 class ChatSideB {
 public:
@@ -20,7 +22,7 @@ public:
 	}
 };
 
-class MessengerClient: public MThread {
+class MessengerClient: public MThread, MessengerEntity {
 
 	TCPSocket* _serverSocket;
 	bool _running;
@@ -45,6 +47,7 @@ class MessengerClient: public MThread {
 
 public:
 	MessengerClient();
+	virtual ~MessengerClient();
 
 	// Connect to the given server ip and port
 	bool connectToServer(string ip, int port);
@@ -110,8 +113,6 @@ public:
 	void printRoomsList();
 
 	bool isConnectedToServer() const;
-
-	virtual ~MessengerClient();
 };
 
 #endif /* CLIENTMANAGER_H_ */
