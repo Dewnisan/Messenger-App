@@ -77,7 +77,7 @@ int main() {
 		} else if (command == "lcu") {
 			clientManager.printConnectedUsersRequest();
 		} else if (command == "lr") {
-			clientManager.RoomsList();
+			clientManager.roomsList();
 		} else if (command == "lru") {
 			cin >> parameter1; // Room name
 			clientManager.listConnectedUsersInRoom(parameter1);

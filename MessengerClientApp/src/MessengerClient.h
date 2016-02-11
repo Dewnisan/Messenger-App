@@ -24,96 +24,97 @@ public:
 };
 
 class MessengerClient: public MThread, MessengerEntity {
-
-	TCPSocket* _serverSocket;
 	bool _running;
+	TCPSocket* _serverSocket;
 	ChatSideB _udpChatSideB;
 	string _username;
 	vector<ChatSideB*> _chatUsers;
 	string _chatRoomName;
 	ClientLinker *_clientLinker;
-	bool _sessionOn;
-	bool _roomOn;
-	bool _loggedIn;
-	bool _connectedToServer;
 
-	// client receive loop, activated once a login to the server is established
+	bool _connected;
+	bool _loggedIn;
+	bool _inSession;
+	bool _inChatRoom;
+
+
+	// Receive loop, activated when logging into the server
 	void run();
 
-	// clear the vector of the users - (after exiting a room)
+	// Clears the pool of the users (after exiting a room)
 	void clearRoomUsers();
 
-	// adds room mate vector of the users
+	// Adds room mate vector of the users
 	void addRoomUser(string roomate, string IP, int port);
 
 public:
 	MessengerClient();
 	virtual ~MessengerClient();
 
-	// Connect to the given server ip and port
+	// Connects to the given server IP and port
 	bool connectToServer(string ip, int port);
 
-	// Register a new user to server with a given username and password
+	bool isConnectedToServer() const;
+
+	// Registers a new user to server with a given user name and password
 	void signup(string username, string password);
 
-	// Login to server with a given username and password
+	// Logins to server with a given user name and password
 	void login(string username, string password);
 
-	// Open session with the given peer name
+	// Opens session with the given peer name
 	bool openSession(string peerBName);
 
-	// Print the current status of the client
+	// Prints the current status of the client
 	void printCurrentInfo();
 
-	// Send UDP message to specific user or to all the users in a chat room
+	// Sends a UDP message to specific user or to all the users in a chat room
 	bool sendMessage(string msg);
 
-	// open session in the given room name
+	// Opens session in the given room name
 	bool createChatRoom(string name);
 
-	// login to a room by it's room name
+	// Logins to a room by it's room name
 	bool loginToChatRoom(string roomName);
 
-	// send to the server request of connected users
+	// Sends to the server request of connected users
 	void printConnectedUsersRequest();
 
-	// print all of the connected users after received from the server
+	// Prints all of the connected users after received from the server
 	void printConnectedUsers();
 
-	// print the list of the users from the file
+	// Print the list of the users from the file
 	void printListUsers();
 
-	// send to the server request of room list
-	void RoomsList();
+	// Sends to the server request of room list
+	void roomsList();
 
-	// send to the server request of all the users in a room (given by it's name)
+	// Sends to the server request of all the users in a room (given by it's name)
 	void listConnectedUsersInRoom(string roomName);
 
-	// send to the server request of list of the users from the file
+	// Send to the server request of list of the users from the file
 	void listUsers();
 
-	// disconnect the open session / exit from a room
+	// Disconnects the open session OR exit from a room
 	bool exitRoomOrCloseSession();
 
-	// delete the room by it's name (only the owner of the room can delete it)
+	// Deletes the room by it's name (only the owner of the room can delete it)
 	bool deleteChatRoom(string msg);
 
-	// return true if the user is in a session or in a chat. false otherwise
-	bool isInChat();
+	// Returns true if the user is in a session or in a chat, false otherwise
+	bool isConversing();
 
-	// disconnect from the server and exit
+	// Disconnects from the server and exits
 	void exitAll();
 
-	// update the user details after leaving a room
+	// Updates the user details after leaving a room
 	void chatRoomLeaved();
 
-	// update the rooms info
+	// Updates the rooms info
 	void chatRoomUpdate();
 
-	// print the list rooms
+	// Prints the list rooms
 	void printRoomsList();
-
-	bool isConnectedToServer() const;
 };
 
 #endif /* CLIENTMANAGER_H_ */
