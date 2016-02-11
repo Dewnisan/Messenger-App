@@ -127,10 +127,9 @@ void MessengerClient::signup(string username, string password, int cmd) {
 	}
 }
 
-// login to server with a given username and password
 void MessengerClient::login(string username, string password, int cmd) {
 	if (_loggedIn) {
-		cout << "login failed - you are already logged in" << endl;
+		cout << "Login failed - you are already logged in" << endl;
 		return;
 	}
 
@@ -152,7 +151,7 @@ void MessengerClient::login(string username, string password, int cmd) {
 			cout << username + " already logged in" << endl;
 		}
 	} else {
-		cout << "the server is not connected" << endl;
+		cout << "The server is not connected" << endl;
 	}
 }
 
