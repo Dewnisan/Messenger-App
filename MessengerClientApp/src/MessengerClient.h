@@ -54,19 +54,19 @@ public:
 	bool connectToServer(string ip, int port);
 
 	// Register a new user to server with a given username and password
-	void signup(string username, string password, int cmd);
+	void signup(string username, string password);
 
 	// Login to server with a given username and password
-	void login(string username, string password, int cmd);
+	void login(string username, string password);
 
-	// open session with the given peer name
-	bool openSession(string chatSideBName);
+	// Open session with the given peer name
+	bool openSession(string peerBName);
 
-	// print the current status of the client
+	// Print the current status of the client
 	void printCurrentInfo();
 
-	// sending UDP message to specific user or to all the users in a room.
-	bool sendMsg(string msg);
+	// Send UDP message to specific user or to all the users in a chat room
+	bool sendMessage(string msg);
 
 	// open session in the given room name
 	bool createChatRoom(string name);

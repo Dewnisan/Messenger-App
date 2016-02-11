@@ -5,11 +5,17 @@ ClientLinker::ClientLinker(int port):_clientSocket(port)
 	start();
 }
 
-/**
- * This method runs in a separate thread, it reads the incoming messages
- * from the socket.
- * The thread should exist when the socket is closed
- */
+ClientLinker::~ClientLinker() {
+	_running = false;
+	_clientSocket.cclose();
+	waitForThread();
+}
+
+void ClientLinker::send(string msg,string IP, int port)
+{
+	_clientSocket.sendTo(msg,IP,port);
+}
+
 void ClientLinker::run()
 {
 	_running = true;
@@ -22,13 +28,4 @@ void ClientLinker::run()
 	}
 }
 
-void ClientLinker::send(string msg,string IP, int port)
-{
-	_clientSocket.sendTo(msg,IP,port);
-}
 
-ClientLinker::~ClientLinker() {
-	_running = false;
-	_clientSocket.cclose();
-	waitForThread();
-}

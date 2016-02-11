@@ -1,6 +1,6 @@
 #include "MessengerClient.h"
-
 #include "TCPSocket.h"
+#include "TCPMessengerProtocolExtentions.h"
 
 MessengerClient::MessengerClient() {
 	_loggedIn = false;
@@ -104,49 +104,49 @@ bool MessengerClient::connectToServer(string ip, int port) {
 	return true;
 }
 
-void MessengerClient::signup(string username, string password, int cmd) {
+void MessengerClient::signup(string username, string password) {
 	if (_loggedIn) {
-		cout << "You cannot register while you logged in" << endl;
+		cout << "You cannot register while you are logged in" << endl;
 		return;
 	}
 
-	int response;
-	if (_serverSocket) {
-		MessengerClient::sendCommandToPeer(_serverSocket, cmd);
+	if (_serverSocket != NULL) {
+		MessengerClient::sendCommandToPeer(_serverSocket, REGISTRATION_REQUEST);
 		MessengerClient::sendDataToPeer(_serverSocket, username);
 		MessengerClient::sendDataToPeer(_serverSocket, password);
 
-		response = MessengerClient::readCommandFromPeer(_serverSocket);
+		int response = MessengerClient::readCommandFromPeer(_serverSocket);
 		if (response == REGISTRATION_REQUEST_APPROVED) {
-			cout << "signed up was successful with the user: " << username << endl;
-		} else if (cmd == REGISTRATION_REQUEST_DENIED) {
-			cout << "you failed to sign up" << endl;
+			cout << "Signed up was successful with the user: " << username << endl;
+		} else if (response == REGISTRATION_REQUEST_DENIED) {
+			cout << "You have failed to sign up" << endl;
 		}
 	} else {
-		cout << "the server is not connected" << endl;
+		cout << "The server is not connected" << endl;
 	}
 }
 
-void MessengerClient::login(string username, string password, int cmd) {
+void MessengerClient::login(string username, string password) {
 	if (_loggedIn) {
 		cout << "Login failed - you are already logged in" << endl;
 		return;
 	}
 
-	int response;
 	if (_serverSocket != NULL) {
-		MessengerClient::sendCommandToPeer(_serverSocket, cmd);
+		MessengerClient::sendCommandToPeer(_serverSocket, LOGIN_REQUEST);
 		MessengerClient::sendDataToPeer(_serverSocket, username);
 		MessengerClient::sendDataToPeer(_serverSocket, password);
 
-		response = MessengerClient::readCommandFromPeer(_serverSocket);
+		int response = MessengerClient::readCommandFromPeer(_serverSocket);
 		if (response == LOGIN_REQUEST_APPROVED) {
 			_username = username;
 			_loggedIn = true;
+
 			start();
-			cout << "you were logged in as " + username << endl;
+
+			cout << "You are logged in as " + username << endl;
 		} else if (response == LOGIN_REQUEST_WRONG_DETAILS) {
-			cout << "you enter wrong user or password" << endl;
+			cout << "You have entered wrong user name or password" << endl;
 		} else if (response == LOGIN_REQUEST_ALREADY_LOGGED) {
 			cout << username + " already logged in" << endl;
 		}
@@ -155,9 +155,12 @@ void MessengerClient::login(string username, string password, int cmd) {
 	}
 }
 
-bool MessengerClient::openSession(string partnerName) {
-	if (_serverSocket == NULL || !_loggedIn) {
-		cout << "You are not connected/logged in" << endl;
+bool MessengerClient::openSession(string peerName) {
+	if (_serverSocket == NULL) {
+		cout << "You are not logged in" << endl;
+		return false;
+	} else if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
 		return false;
 	}
 
@@ -166,40 +169,47 @@ bool MessengerClient::openSession(string partnerName) {
 		return false;
 	}
 
-	if (partnerName == _username) {
+	if (peerName == _username) {
 		cout << "You can't open session with yourself" << endl;
 		return false;
 	}
 
 	MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CREATE);
-	MessengerClient::sendDataToPeer(_serverSocket, partnerName);
+	MessengerClient::sendDataToPeer(_serverSocket, peerName);
 
 	return true;
 }
 
 void MessengerClient::printCurrentInfo() {
-	if (_serverSocket)
+	if (_serverSocket != NULL) {
 		cout << "Connected to server " << endl;
-	else
-		cout << "NOT Connected to server " << endl;
-	if (_loggedIn)
+	} else {
+		cout << "Not Connected to server " << endl;
+	}
+
+	if (_loggedIn) {
 		cout << "Logged in as  " << _username << endl;
-	else
-		cout << "NOT logged in " << endl;
-	if (_sessionOn)
+	} else {
+		cout << "Not logged in " << endl;
+	}
+
+	if (_sessionOn) {
 		cout << "In session " << endl;
-	else
-		cout << "NOT in session " << endl;
-	if (_roomOn)
+	} else {
+		cout << "Not in session " << endl;
+	}
+
+	if (_roomOn) {
 		cout << "In chat room: " << _chatRoomName << endl;
-	else
-		cout << "NOT In chat room: " << endl;
+	} else {
+		cout << "Not in a chat room " << endl;
+	}
 }
 
-// sending UDP message to specific user or to all the users in a room.
-bool MessengerClient::sendMsg(string msg) {
+bool MessengerClient::sendMessage(string msg) {
 	if (_sessionOn) {
-		_clientLinker->send(string(">[") + _username + string("]") + msg, _udpChatSideB._IP, _udpChatSideB._port);
+		_clientLinker->send(">[" + _username + "]" + msg, _udpChatSideB._IP, _udpChatSideB._port);
+
 		return true;
 	} else if (_roomOn) {
 		std::vector<ChatSideB*>::iterator iter = _chatUsers.begin();
@@ -209,8 +219,10 @@ bool MessengerClient::sendMsg(string msg) {
 			_clientLinker->send(string(">[") + _username + string("] ") + msg, (*iter)->_IP, (*iter)->_port);
 			iter++;
 		}
+
 		return true;
 	}
+
 	return false;
 }
 

@@ -47,11 +47,11 @@ int main() {
 		} else if (command == "login") {
 			cin >> parameter1; // Username
 			cin >> parameter2; // Password
-			clientManager.login(parameter1, parameter2, LOGIN_REQUEST);
+			clientManager.login(parameter1, parameter2);
 		} else if (command == "register") {
 			cin >> parameter1; // Username
 			cin >> parameter2; // Password
-			clientManager.signup(parameter1, parameter2, REGISTRATION_REQUEST);
+			clientManager.signup(parameter1, parameter2);
 		} else if (command == "o") {
 			cin >> parameter1; // Username to open session with
 			clientManager.openSession(parameter1);
@@ -59,7 +59,7 @@ int main() {
 			clientManager.printCurrentInfo();
 		} else if (command == "s") {
 			getline(std::cin, parameter1); // Message to send with UDP
-			if (!clientManager.sendMsg(parameter1)) {
+			if (!clientManager.sendMessage(parameter1)) {
 				cout << "you need to create a session or login to a room first" << endl;
 			}
 		} else if (command == "cr") {
