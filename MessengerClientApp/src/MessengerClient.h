@@ -11,21 +11,21 @@
 #include "TCPMessengerProtocol.h"
 #include "TCPSocket.h"
 
-class ChatRemoteSide {
+class Peer {
 	std::string _name;
 	std::string _ip;
 	int _port;
 
 public:
-	ChatRemoteSide(std::string name, std::string ip, int port) :
+	Peer(std::string name, std::string ip, int port) :
 			_name(name), _ip(ip), _port(port) {
 	}
 
-	ChatRemoteSide() :
+	Peer() :
 			_port(0) {
 	}
 
-	virtual ~ChatRemoteSide() {
+	virtual ~Peer() {
 	}
 
 	void reset() {
@@ -61,11 +61,15 @@ public:
 
 class MessengerClient: public MThread, MessengerEntity {
 	bool _running;
-	TCPSocket* _serverSocket;
-	ChatRemoteSide _udpChatSideB;
 	string _username;
-	vector<ChatRemoteSide*> _chatUsers;
+
+	TCPSocket* _serverSocket;
+
+	Peer _sessionPeer;
+
+	vector<Peer*> _chatUsers;
 	string _chatRoomName;
+
 	ClientLinker *_clientLinker;
 
 	bool _connected;
@@ -79,8 +83,23 @@ class MessengerClient: public MThread, MessengerEntity {
 	// Clears the pool of the users (after exiting a room)
 	void clearRoomUsers();
 
-	// Adds room mate vector of the users
-	void addRoomUser(string name, string ip, int port);
+	// Adds user to pool of the chat room users
+	void addChatRoomUser(string name, string ip, int port);
+
+	// Updates the user's details after leaving a chat room
+	void chatRoomLeft();
+
+	// Updates the rooms info
+	void chatRoomUpdate();
+
+	// Print the list of the users according to server's response
+	void printListUsers();
+
+	// Prints all of the connected users according to server's response
+	void printConnectedUsers();
+
+	// Prints the list of chat rooms according to server's response
+	void printRoomsList();
 
 public:
 	MessengerClient();
@@ -95,7 +114,7 @@ public:
 	// Logins to server with a given user name and password
 	void login(string username, string password);
 
-	// Send to the server request of list of the users from the file
+	// Sends to the server request of list of the users from the file
 	void listUsers();
 
 	// Sends to the server request of connected users
@@ -122,7 +141,7 @@ public:
 	// Sends a UDP message to specific user or to all the users in a chat room
 	bool sendMessage(string msg);
 
-	// Disconnects the open session OR exit from a room
+	// Disconnects the open session OR exit from a chat room
 	bool closeSessionOrExitRoom();
 
 	// Prints the current status of the client
@@ -135,21 +154,6 @@ public:
 
 	// Returns true if the user is in a session or in a chat, false otherwise
 	bool isConversing() const;
-
-	// Prints all of the connected users after received from the server
-	void printConnectedUsers();
-
-	// Print the list of the users from the file
-	void printListUsers();
-
-	// Updates the user details after leaving a room
-	void chatRoomLeaved();
-
-	// Updates the rooms info
-	void chatRoomUpdate();
-
-	// Prints the list rooms
-	void printRoomsList();
 };
 
 #endif /* MESSEMGERCLIENT_H_ */
