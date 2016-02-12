@@ -59,7 +59,7 @@ int main() {
 		} else if (command == "cr") {
 			cin >> parameter1; // Room name
 			if (!clientManager.createChatRoom(parameter1)) {
-				cout << "You cannot create room in current status, check if you are logged in" << endl;
+				cout << "Cannot create room in current status, check if you are logged in" << endl;
 			}
 		} else if (command == "or") {
 			cin >> parameter1; // Room name
@@ -69,7 +69,7 @@ int main() {
 		} else if (command == "dr") {
 			cin >> parameter1; // Room name
 			if (!clientManager.deleteChatRoom(parameter1)) {
-				cout << "You cannot delete the room" << endl;
+				cout << "Cannot delete specified room" << endl;
 			}
 		} else if (command == "lr") {
 			clientManager.listRooms();
@@ -90,14 +90,14 @@ int main() {
 			clientManager.printCurrentInfo();
 		} else if (command == "d") {
 			if (clientManager.connectedToServer()) {
-				clientManager.exitAll();
-				cout << "You logged out from the server" << endl;
+				clientManager.disconnectFromServer();
+				cout << "Disconnection from the server completed" << endl;
 			} else {
 				cout << "Already disconnected from the server" << endl;
 			}
 		} else if (command == "x") {
 			if (clientManager.connectedToServer()) {
-				clientManager.exitAll();
+				clientManager.disconnectFromServer();
 			}
 
 			cout << "Shutting down..." << endl;

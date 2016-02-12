@@ -93,7 +93,7 @@ public:
 	void printCurrentInfo();
 
 	// Disconnects from the server and exits
-	void exitAll();
+	void disconnectFromServer();
 
 	bool connectedToServer() const;
 

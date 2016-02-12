@@ -289,8 +289,10 @@ bool MessengerClient::sendMessage(string msg) {
 bool MessengerClient::closeSessionOrExitRoom() {
 	if (_inChatRoom) {
 		MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_EXIT);
+		_inChatRoom = false;
 	} else if (_inSession) {
 		MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CLOSE);
+		_inSession = false;
 	} else {
 		return false;
 	}
@@ -324,15 +326,18 @@ void MessengerClient::printCurrentInfo() {
 	}
 }
 
-void MessengerClient::exitAll() {
+void MessengerClient::disconnectFromServer() {
 	closeSessionOrExitRoom();
 
 	MessengerClient::sendCommandToPeer(_serverSocket, EXIT);
 
 	_username.clear();
+
 	_running = false;
 	_loggedIn = false;
 	_connected = false;
+
+	delete _serverSocket;
 	_serverSocket = NULL;
 }
 
