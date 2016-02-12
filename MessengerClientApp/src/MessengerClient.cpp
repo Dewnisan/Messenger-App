@@ -120,10 +120,6 @@ bool MessengerClient::connectToServer(string ip, int port) {
 	return true;
 }
 
-bool MessengerClient::isConnectedToServer() const {
-	return _connected;
-}
-
 void MessengerClient::signup(string username, string password) {
 	if (_loggedIn) {
 		cout << "Cannot register while logged in" << endl;
@@ -175,6 +171,77 @@ void MessengerClient::login(string username, string password) {
 	}
 }
 
+void MessengerClient::listUsers() {
+	if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
+		return;
+	}
+
+	MessengerClient::sendCommandToPeer(_serverSocket, LIST_USERS);
+}
+
+void MessengerClient::listConnectedUsers() {
+	if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
+		return;
+	}
+
+	MessengerClient::sendCommandToPeer(_serverSocket, LIST_CONNECTED_USERS);
+}
+
+bool MessengerClient::createChatRoom(string roomName) {
+	if (!_loggedIn || isConversing()) {
+		return false;
+	}
+
+	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_CREATE);
+	MessengerClient::sendDataToPeer(_serverSocket, roomName);
+
+	return true;
+}
+
+bool MessengerClient::enterChatRoom(string roomName) {
+	if (!_loggedIn || isConversing()) {
+		return false;
+	}
+
+	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_LOGIN);
+	MessengerClient::sendDataToPeer(_serverSocket, roomName);
+
+	return true;
+}
+
+bool MessengerClient::deleteChatRoom(string name) {
+	if (!_loggedIn) {
+		cout << "you are not logged in" << endl;
+		return false;
+	}
+
+	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_CLOSE);
+	MessengerClient::sendDataToPeer(_serverSocket, name);
+
+	return true;
+}
+
+void MessengerClient::listRooms() {
+	if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
+		return;
+	}
+
+	MessengerClient::sendCommandToPeer(_serverSocket, LIST_ROOMS);
+}
+
+void MessengerClient::listRoomUsers(string roomName) {
+	if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
+		return;
+	}
+
+	MessengerClient::sendCommandToPeer(_serverSocket, LIST_CONNECTED_USERS_IN_ROOM);
+	MessengerClient::sendDataToPeer(_serverSocket, roomName);
+}
+
 bool MessengerClient::openSession(string peerName) {
 	if (!_loggedIn) {
 		cout << "Cannot open session without being logged in" << endl;
@@ -193,6 +260,40 @@ bool MessengerClient::openSession(string peerName) {
 
 	MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CREATE);
 	MessengerClient::sendDataToPeer(_serverSocket, peerName);
+
+	return true;
+}
+
+bool MessengerClient::sendMessage(string msg) {
+	if (_inSession) {
+		_clientLinker->send(">[" + _username + "]" + msg, _udpChatSideB._IP, _udpChatSideB._port);
+
+		return true;
+	} else if (_inChatRoom) {
+		std::vector<ChatSideB*>::iterator iter = _chatUsers.begin();
+		std::vector<ChatSideB*>::iterator enditer = _chatUsers.end();
+
+		while (iter != enditer) {
+			_clientLinker->send(string(">[") + _username + string("] ") + msg, (*iter)->_IP, (*iter)->_port);
+			iter++;
+		}
+
+		return true;
+	} else {
+		cout << "You need to create a session or login to a room first" << endl;
+	}
+
+	return false;
+}
+
+bool MessengerClient::closeSessionOrExitRoom() {
+	if (_inChatRoom) {
+		MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_EXIT);
+	} else if (_inSession) {
+		MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CLOSE);
+	} else {
+		return false;
+	}
 
 	return true;
 }
@@ -223,48 +324,20 @@ void MessengerClient::printCurrentInfo() {
 	}
 }
 
-bool MessengerClient::sendMessage(string msg) {
-	if (_inSession) {
-		_clientLinker->send(">[" + _username + "]" + msg, _udpChatSideB._IP, _udpChatSideB._port);
+void MessengerClient::exitAll() {
+	closeSessionOrExitRoom();
 
-		return true;
-	} else if (_inChatRoom) {
-		std::vector<ChatSideB*>::iterator iter = _chatUsers.begin();
-		std::vector<ChatSideB*>::iterator enditer = _chatUsers.end();
+	MessengerClient::sendCommandToPeer(_serverSocket, EXIT);
 
-		while (iter != enditer) {
-			_clientLinker->send(string(">[") + _username + string("] ") + msg, (*iter)->_IP, (*iter)->_port);
-			iter++;
-		}
-
-		return true;
-	} else {
-		cout << "You need to create a session or login to a room first" << endl;
-	}
-
-	return false;
+	_username.clear();
+	_running = false;
+	_loggedIn = false;
+	_connected = false;
+	_serverSocket = NULL;
 }
 
-bool MessengerClient::createChatRoom(string roomName) {
-	if (!_loggedIn || isConversing()) {
-		return false;
-	}
-
-	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_CREATE);
-	MessengerClient::sendDataToPeer(_serverSocket, roomName);
-
-	return true;
-}
-
-bool MessengerClient::enterChatRoom(string roomName) {
-	if (!_loggedIn || isConversing()) {
-		return false;
-	}
-
-	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_LOGIN);
-	MessengerClient::sendDataToPeer(_serverSocket, roomName);
-
-	return true;
+bool MessengerClient::connectedToServer() const {
+	return _connected;
 }
 
 void MessengerClient::printConnectedUsers() {
@@ -292,88 +365,14 @@ void MessengerClient::printListUsers() {
 	}
 }
 
-void MessengerClient::listConnectedUsers() {
-	if (!_loggedIn) {
-		cout << "You are not logged in" << endl;
-		return;
-	}
-
-	MessengerClient::sendCommandToPeer(_serverSocket, LIST_CONNECTED_USERS);
-}
-
-void MessengerClient::listUsers() {
-	if (!_loggedIn) {
-		cout << "You are not logged in" << endl;
-		return;
-	}
-
-	MessengerClient::sendCommandToPeer(_serverSocket, LIST_USERS);
-}
-
-void MessengerClient::listRooms() {
-	if (!_loggedIn) {
-		cout << "You are not logged in" << endl;
-		return;
-	}
-
-	MessengerClient::sendCommandToPeer(_serverSocket, LIST_ROOMS);
-}
-
-void MessengerClient::listRoomUsers(string roomName) {
-	if (!_loggedIn) {
-		cout << "You are not logged in" << endl;
-		return;
-	}
-
-	MessengerClient::sendCommandToPeer(_serverSocket, LIST_CONNECTED_USERS_IN_ROOM);
-	MessengerClient::sendDataToPeer(_serverSocket, roomName);
-}
-
-bool MessengerClient::deleteChatRoom(string name) {
-	if (!_loggedIn) {
-		cout << "you are not logged in" << endl;
-		return false;
-	}
-
-	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_CLOSE);
-	MessengerClient::sendDataToPeer(_serverSocket, name);
-
-	return true;
-}
-
-bool MessengerClient::exitRoomOrCloseSession() {
-	if (_inChatRoom) {
-		MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_EXIT);
-	} else if (_inSession) {
-		MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CLOSE);
-	} else {
-		return false;
-	}
-
-	return true;
-
-}
-
 void MessengerClient::chatRoomLeaved() {
 	_inChatRoom = false;
 	clearRoomUsers();
 	delete (_clientLinker);
 }
 
-bool MessengerClient::isConversing() {
+bool MessengerClient::isConversing() const {
 	return _inChatRoom || _inSession;
-}
-
-void MessengerClient::exitAll() {
-	exitRoomOrCloseSession();
-
-	MessengerClient::sendCommandToPeer(_serverSocket, EXIT);
-
-	_username.clear();
-	_running = false;
-	_loggedIn = false;
-	_connected = false;
-	_serverSocket = NULL;
 }
 
 void MessengerClient::printRoomsList() {

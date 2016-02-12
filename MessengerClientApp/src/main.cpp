@@ -83,20 +83,20 @@ int main() {
 			getline(std::cin, parameter1); // Message to send with UDP
 			clientManager.sendMessage(parameter1);
 		} else if (command == "cs") {
-			if (!clientManager.exitRoomOrCloseSession()) {
+			if (!clientManager.closeSessionOrExitRoom()) {
 				cout << "There is not session or room to exit from" << endl;
 			}
 		} else if (command == "l") {
 			clientManager.printCurrentInfo();
 		} else if (command == "d") {
-			if (clientManager.isConnectedToServer()) {
+			if (clientManager.connectedToServer()) {
 				clientManager.exitAll();
 				cout << "You logged out from the server" << endl;
 			} else {
 				cout << "Already disconnected from the server" << endl;
 			}
 		} else if (command == "x") {
-			if (clientManager.isConnectedToServer()) {
+			if (clientManager.connectedToServer()) {
 				clientManager.exitAll();
 			}
 
