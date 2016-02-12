@@ -32,25 +32,25 @@ int main() {
 		string command;
 		cin >> command;
 
-		if (command == "lcu") { // List Connected Users
-			messengerServer.getListConnectedUsers();
+		if (command == "lu") { // List of all users from the file
+			messengerServer.listUsers();
+		} else if (command == "lcu") { // List connected users
+			messengerServer.listConnectedUsers();
 		} else if (command == "ls") { // List of all open sessions
-			messengerServer.getListSessions();
-		} else if (command == "lu") { // List of all Users from the file
-			messengerServer.getListUsers();
+			messengerServer.listSessions();
 		} else if (command == "lr") { // List of all the rooms
-			messengerServer.getListRooms();
+			messengerServer.listRooms();
 		} else if (command == "lru") {
 			string chatRoom;
 			cin >> chatRoom;
-			messengerServer.getListChatUsers(chatRoom); // List of users in a specific room
-		} else if (command == "p") {
-			printInstructions();
+			messengerServer.listChatUsers(chatRoom); // List of users in a specific room
 		} else if (command == "x") {
 			cout << "SHUTDOWN ALL..." << endl;
 			running = false;
+		} else if (command == "p") {
+			printInstructions();
 		} else {
-			cout << "Wrong input - To print instructions type: p" << endl;
+			cout << "Wrong input - to print instructions type: p" << endl;
 		}
 	}
 

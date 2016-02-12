@@ -136,7 +136,7 @@ bool MessengerServer::addUser(TCPSocket* userSocket, string LoginUserName) {
 }
 
 // Print List of the connected users
-int MessengerServer::getListConnectedUsers() {
+int MessengerServer::listConnectedUsers() {
 	if (_users.begin() == _users.end()) {
 		cout << "There aren't any users connected" << endl;
 		return 0;
@@ -181,7 +181,7 @@ bool MessengerServer::isConnected(string username) {
 }
 
 // get list of all open sessions
-void MessengerServer::getListSessions() {
+void MessengerServer::listSessions() {
 	cout << "All the connected users that in Session:" << endl;
 	std::map<string, User*>::iterator iter;
 
@@ -195,7 +195,7 @@ void MessengerServer::getListSessions() {
 }
 
 // Print list of all chat rooms
-void MessengerServer::getListRooms() {
+void MessengerServer::listRooms() {
 	if (_chatRooms.begin() != _chatRooms.end()) {
 		cout << "the rooms list:" << endl;
 		this->readfromChatRoom(NULL);
@@ -212,7 +212,7 @@ void MessengerServer::getListRooms(User *client) {
 }
 
 // Print list of users in a specific room
-int MessengerServer::getListChatUsers(string ChatRoomName) {
+int MessengerServer::listChatUsers(string ChatRoomName) {
 	int numOfUsers;
 	if (_chatRooms.find(ChatRoomName) == _chatRooms.end()) {
 		cout << "No such room: " << ChatRoomName << endl;
@@ -263,7 +263,7 @@ void MessengerServer::getListUsers(User *client) {
 }
 
 // Print List of users from login file
-void MessengerServer::getListUsers() {
+void MessengerServer::listUsers() {
 	cout << "the users:" << endl;
 	readFromFile(NULL); // To server
 }

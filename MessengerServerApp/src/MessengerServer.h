@@ -51,7 +51,7 @@ public:
 	//int  numOfUserFromList();
 
 	// Print List of the connected users
-	int getListConnectedUsers();
+	int listConnectedUsers();
 
 	// Send list of the connected users to the asking client
 	int getListConnectedUsers(User *client);
@@ -59,22 +59,22 @@ public:
 	bool isConnected(string username);
 
 	// get list of all open sessions
-	void getListSessions();
+	void listSessions();
 
 	// Print list of all chat rooms
-	void getListRooms();
+	void listRooms();
 
 	// Send  list of chat rooms to the asking client
 	void getListRooms(User *clientName);
 
 	// Print list of users in a specific room
-	int getListChatUsers(string ChatRoomName);
+	int listChatUsers(string ChatRoomName);
 
 	// Send list of users in a specific room to the asking client
 	int getListChatUsers(User *clientName);
 
 	// Print List of users from login file
-	void getListUsers();
+	void listUsers();
 
 	// Send List of users from login file to asking client
 	void getListUsers(User *clientName);
