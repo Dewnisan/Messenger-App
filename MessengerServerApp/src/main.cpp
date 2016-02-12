@@ -32,20 +32,20 @@ int main() {
 		string command;
 		cin >> command;
 
-		if (command == "lu") { // List of all users from the file
+		if (command == "lu") {
 			messengerServer.listUsers();
-		} else if (command == "lcu") { // List connected users
+		} else if (command == "lcu") {
 			messengerServer.listConnectedUsers();
-		} else if (command == "ls") { // List of all open sessions
+		} else if (command == "ls") {
 			messengerServer.listSessions();
-		} else if (command == "lr") { // List of all the rooms
+		} else if (command == "lr") {
 			messengerServer.listRooms();
 		} else if (command == "lru") {
-			string chatRoom;
-			cin >> chatRoom;
-			messengerServer.listChatUsers(chatRoom); // List of users in a specific room
+			string chatRoomName;
+			cin >> chatRoomName;
+			messengerServer.listChatUsers(chatRoomName);
 		} else if (command == "x") {
-			cout << "SHUTDOWN ALL..." << endl;
+			cout << "Server is shutting down..." << endl;
 			running = false;
 		} else if (command == "p") {
 			printInstructions();
