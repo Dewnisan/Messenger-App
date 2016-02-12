@@ -65,9 +65,9 @@ class MessengerClient: public MThread, MessengerEntity {
 
 	TCPSocket* _serverSocket;
 
-	Peer _sessionPeer;
+	Peer _sessionPeer; // Used when opening a session with one user
 
-	vector<Peer*> _chatUsers;
+	vector<Peer*> _chatUsers; // Used when entering a chat room
 	string _chatRoomName;
 
 	ClientLinker *_clientLinker;

@@ -102,6 +102,7 @@ int main() {
 
 			cout << "Shutting down..." << endl;
 			running = false;
+			clientManager.waitForThread();
 		} else if (command == "p") {
 			printInstructions();
 		} else {

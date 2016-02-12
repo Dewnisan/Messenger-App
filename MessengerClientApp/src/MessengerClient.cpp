@@ -267,7 +267,11 @@ void MessengerClient::listConnectedUsers() {
 }
 
 bool MessengerClient::createChatRoom(string roomName) {
-	if (!_loggedIn || isConversing()) {
+	if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
+		return false;
+	} else if (isConversing()) {
+		cout << "Cannot perform action while user is conversing" << endl;
 		return false;
 	}
 
@@ -278,8 +282,13 @@ bool MessengerClient::createChatRoom(string roomName) {
 }
 
 bool MessengerClient::enterChatRoom(string roomName) {
-	if (!_loggedIn || isConversing()) {
+	if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
 		return false;
+	}
+
+	if (isConversing()) {
+		closeSessionOrExitRoom();
 	}
 
 	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_LOGIN);
@@ -331,8 +340,7 @@ bool MessengerClient::openSession(string peerName) {
 	}
 
 	if (isConversing()) {
-		cout << "Already in a session" << endl;
-		return false;
+		closeSessionOrExitRoom();
 	}
 
 	MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CREATE);
@@ -347,12 +355,8 @@ bool MessengerClient::sendMessage(string msg) {
 
 		return true;
 	} else if (_inChatRoom) {
-		std::vector<Peer*>::iterator iter = _chatUsers.begin();
-		std::vector<Peer*>::iterator enditer = _chatUsers.end();
-
-		while (iter != enditer) {
+		for (vector<Peer*>::iterator iter = _chatUsers.begin(); iter != _chatUsers.end(); iter++) {
 			_clientLinker->send(string(">[") + _username + string("] ") + msg, (*iter)->getIp(), (*iter)->getPort());
-			iter++;
 		}
 
 		return true;
@@ -414,6 +418,7 @@ void MessengerClient::disconnectFromServer() {
 	_loggedIn = false;
 	_connected = false;
 
+	_serverSocket->cclose();
 	delete _serverSocket;
 	_serverSocket = NULL;
 }
