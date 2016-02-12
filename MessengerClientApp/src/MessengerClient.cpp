@@ -177,17 +177,17 @@ void MessengerClient::login(string username, string password) {
 
 bool MessengerClient::openSession(string peerName) {
 	if (!_loggedIn) {
-		cout << "You are not logged in" << endl;
-		return false;
-	}
-
-	if (isConversing()) {
-		cout << "You are already in a session" << endl;
+		cout << "Cannot open session without being logged in" << endl;
 		return false;
 	}
 
 	if (peerName == _username) {
-		cout << "You can't open session with yourself" << endl;
+		cout << "Cannot open session with yourself" << endl;
+		return false;
+	}
+
+	if (isConversing()) {
+		cout << "Already in a session" << endl;
 		return false;
 	}
 
@@ -238,24 +238,26 @@ bool MessengerClient::sendMessage(string msg) {
 		}
 
 		return true;
+	} else {
+		cout << "You need to create a session or login to a room first" << endl;
 	}
 
 	return false;
 }
 
-bool MessengerClient::createChatRoom(string name) {
-	if (!_serverSocket || !_loggedIn || isConversing()) {
+bool MessengerClient::createChatRoom(string roomName) {
+	if (!_loggedIn || isConversing()) {
 		return false;
 	}
 
 	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_CREATE);
-	MessengerClient::sendDataToPeer(_serverSocket, name);
+	MessengerClient::sendDataToPeer(_serverSocket, roomName);
 
 	return true;
 }
 
-bool MessengerClient::loginToChatRoom(string roomName) {
-	if (isConversing() || !_serverSocket || !_loggedIn) {
+bool MessengerClient::enterChatRoom(string roomName) {
+	if (!_loggedIn || isConversing()) {
 		return false;
 	}
 
@@ -266,32 +268,33 @@ bool MessengerClient::loginToChatRoom(string roomName) {
 }
 
 void MessengerClient::printConnectedUsers() {
-	int i;
-	int numOfUsers;
-	numOfUsers = MessengerClient::readCommandFromPeer(_serverSocket);
-	for (i = 0; i < numOfUsers; i++) {
-		cout << " user: " << MessengerClient::readDataFromPeer(_serverSocket) << endl;
+	int numOfUsers = MessengerClient::readCommandFromPeer(_serverSocket);
+	for (int i = 0; i < numOfUsers; i++) {
+		cout << "User: " << MessengerClient::readDataFromPeer(_serverSocket) << endl;
 	}
-	if (i == 0) {
-		cout << "no one is connected" << endl;
+
+	if (numOfUsers == 0) {
+		cout << "No one is connected" << endl;
 	}
 }
 
 void MessengerClient::printListUsers() {
 	int i;
 	int numOfUsers;
+
 	numOfUsers = MessengerClient::readCommandFromPeer(_serverSocket);
 	for (i = 0; i < numOfUsers; i++) {
 		cout << " user: " << MessengerClient::readDataFromPeer(_serverSocket) << endl;
 	}
+
 	if (i == 0) {
 		cout << "no one is connected" << endl;
 	}
 }
 
-void MessengerClient::printConnectedUsersRequest() {
-	if (!_serverSocket || !_loggedIn) {
-		cout << "You are not connected or not logged in" << endl;
+void MessengerClient::listConnectedUsers() {
+	if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
 		return;
 	}
 
@@ -299,10 +302,7 @@ void MessengerClient::printConnectedUsersRequest() {
 }
 
 void MessengerClient::listUsers() {
-	if (_serverSocket == NULL) {
-		cout << "You are not logged in" << endl;
-		return;
-	} else if (!_loggedIn) {
+	if (!_loggedIn) {
 		cout << "You are not logged in" << endl;
 		return;
 	}
@@ -310,18 +310,18 @@ void MessengerClient::listUsers() {
 	MessengerClient::sendCommandToPeer(_serverSocket, LIST_USERS);
 }
 
-void MessengerClient::roomsList() {
-	if (!_serverSocket || !_loggedIn) {
-		cout << "you are not connected or not logged in" << endl;
+void MessengerClient::listRooms() {
+	if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
 		return;
 	}
 
 	MessengerClient::sendCommandToPeer(_serverSocket, LIST_ROOMS);
 }
 
-void MessengerClient::listConnectedUsersInRoom(string roomName) {
-	if (!_serverSocket || !_loggedIn) {
-		cout << "you are not connected or not logged in" << endl;
+void MessengerClient::listRoomUsers(string roomName) {
+	if (!_loggedIn) {
+		cout << "You are not logged in" << endl;
 		return;
 	}
 
@@ -330,8 +330,8 @@ void MessengerClient::listConnectedUsersInRoom(string roomName) {
 }
 
 bool MessengerClient::deleteChatRoom(string name) {
-	if (!_serverSocket || !_loggedIn) {
-		cout << "you are not connected/logged in" << endl;
+	if (!_loggedIn) {
+		cout << "you are not logged in" << endl;
 		return false;
 	}
 

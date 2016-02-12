@@ -72,13 +72,13 @@ public:
 	bool sendMessage(string msg);
 
 	// Opens session in the given room name
-	bool createChatRoom(string name);
+	bool createChatRoom(string roomName);
 
-	// Logins to a room by it's room name
-	bool loginToChatRoom(string roomName);
+	// Enters to a room by room's name
+	bool enterChatRoom(string roomName);
 
 	// Sends to the server request of connected users
-	void printConnectedUsersRequest();
+	void listConnectedUsers();
 
 	// Prints all of the connected users after received from the server
 	void printConnectedUsers();
@@ -87,10 +87,10 @@ public:
 	void printListUsers();
 
 	// Sends to the server request of room list
-	void roomsList();
+	void listRooms();
 
 	// Sends to the server request of all the users in a room (given by it's name)
-	void listConnectedUsersInRoom(string roomName);
+	void listRoomUsers(string roomName);
 
 	// Send to the server request of list of the users from the file
 	void listUsers();
