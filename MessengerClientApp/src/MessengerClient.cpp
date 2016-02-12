@@ -14,24 +14,32 @@ void MessengerClient::run() {
 			continue;
 		}
 
+		string name;
+		string ip;
+		int port;
+
 		switch (command) {
 		case SESSION_ESTABLISHED:
-			_udpChatSideB._sideB_name = MessengerClient::readDataFromPeer(_serverSocket);
-			_udpChatSideB._IP = MessengerClient::readDataFromPeer(_serverSocket);
-			_udpChatSideB._port = MessengerClient::readCommandFromPeer(_serverSocket);
+			name = MessengerClient::readDataFromPeer(_serverSocket);
+			ip = MessengerClient::readDataFromPeer(_serverSocket);
+			port = MessengerClient::readCommandFromPeer(_serverSocket);
+
+			_udpChatSideB.setName(name);
+			_udpChatSideB.setIp(ip);
+			_udpChatSideB.setPort(port);
 
 			partnerPort = MessengerClient::readCommandFromPeer(_serverSocket);
 			_clientLinker = new ClientLinker(partnerPort);
 			_inSession = true;
 
-			cout << "You are in direct connection with  " << _udpChatSideB._sideB_name << endl;
+			cout << "You are in direct connection with  " << _udpChatSideB.getName() << endl;
 			break;
 		case SESSION_CREATE_REFUSED:
 			parameter1 = MessengerClient::readDataFromPeer(_serverSocket);
 			cout << "Session has been denied because " << parameter1 << endl;
 			break;
 		case SESSION_CLOSED:
-			_udpChatSideB.clean();
+			_udpChatSideB.reset();
 			_inSession = false;
 			delete (_clientLinker);
 			cout << "the session is now terminated" << endl;
@@ -81,22 +89,15 @@ void MessengerClient::run() {
 }
 
 void MessengerClient::clearRoomUsers() {
-	std::vector<ChatSideB*>::iterator iter = _chatUsers.begin();
-	std::vector<ChatSideB*>::iterator enditer = _chatUsers.end();
-
-	while (iter != enditer) {
-		delete (*iter);
-		iter++;
+	for (vector<ChatRemoteSide*>::iterator iter = _chatUsers.begin(); iter != _chatUsers.end(); iter++) {
+		delete *iter;
 	}
 
 	_chatUsers.clear();
 }
 
-void MessengerClient::addRoomUser(string roomate, string IP, int port) {
-	ChatSideB *temp = new ChatSideB();
-	temp->_sideB_name = roomate;
-	temp->_IP = IP;
-	temp->_port = port;
+void MessengerClient::addRoomUser(string name, string ip, int port) {
+	ChatRemoteSide *temp = new ChatRemoteSide(name, ip, port);
 	_chatUsers.push_back(temp);
 }
 
@@ -266,15 +267,15 @@ bool MessengerClient::openSession(string peerName) {
 
 bool MessengerClient::sendMessage(string msg) {
 	if (_inSession) {
-		_clientLinker->send(">[" + _username + "]" + msg, _udpChatSideB._IP, _udpChatSideB._port);
+		_clientLinker->send(">[" + _username + "]" + msg, _udpChatSideB.getIp(), _udpChatSideB.getPort());
 
 		return true;
 	} else if (_inChatRoom) {
-		std::vector<ChatSideB*>::iterator iter = _chatUsers.begin();
-		std::vector<ChatSideB*>::iterator enditer = _chatUsers.end();
+		std::vector<ChatRemoteSide*>::iterator iter = _chatUsers.begin();
+		std::vector<ChatRemoteSide*>::iterator enditer = _chatUsers.end();
 
 		while (iter != enditer) {
-			_clientLinker->send(string(">[") + _username + string("] ") + msg, (*iter)->_IP, (*iter)->_port);
+			_clientLinker->send(string(">[") + _username + string("] ") + msg, (*iter)->getIp(), (*iter)->getPort());
 			iter++;
 		}
 

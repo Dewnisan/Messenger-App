@@ -1,6 +1,7 @@
 #ifndef MESSEMGERCLIENT_H_
 #define MESSEMGERCLIENT_H_
 
+#include <string>
 #include <vector>
 
 #include "MThread.h"
@@ -10,25 +11,60 @@
 #include "TCPMessengerProtocol.h"
 #include "TCPSocket.h"
 
-class ChatSideB {
-public:
-	string _sideB_name;
-	string _IP;
+class ChatRemoteSide {
+	std::string _name;
+	std::string _ip;
 	int _port;
 
-	void clean() {
-		_sideB_name.clear();
-		_IP.clear();
+public:
+	ChatRemoteSide(std::string name, std::string ip, int port) :
+			_name(name), _ip(ip), _port(port) {
+	}
+
+	ChatRemoteSide() :
+			_port(0) {
+	}
+
+	virtual ~ChatRemoteSide() {
+	}
+
+	void reset() {
+		_name.clear();
+		_ip.clear();
 		_port = 0;
+	}
+
+	const std::string& getIp() const {
+		return _ip;
+	}
+
+	void setIp(const std::string& ip) {
+		_ip = ip;
+	}
+
+	const std::string& getName() const {
+		return _name;
+	}
+
+	void setName(const std::string& name) {
+		_name = name;
+	}
+
+	int getPort() const {
+		return _port;
+	}
+
+	void setPort(int port) {
+		_port = port;
 	}
 };
 
 class MessengerClient: public MThread, MessengerEntity {
 	bool _running;
 	TCPSocket* _serverSocket;
-	ChatSideB _udpChatSideB;
+	ChatRemoteSide _udpChatSideB;
 	string _username;
-	vector<ChatSideB*> _chatUsers;
+	vector<ChatRemoteSide*> _chatUsers;
 	string _chatRoomName;
 	ClientLinker *_clientLinker;
 
@@ -44,7 +80,7 @@ class MessengerClient: public MThread, MessengerEntity {
 	void clearRoomUsers();
 
 	// Adds room mate vector of the users
-	void addRoomUser(string roomate, string IP, int port);
+	void addRoomUser(string name, string ip, int port);
 
 public:
 	MessengerClient();
