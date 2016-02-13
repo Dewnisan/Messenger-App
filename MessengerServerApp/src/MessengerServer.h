@@ -9,8 +9,6 @@
 #include "TCPSocket.h"
 #include "User.h"
 
-class User;
-
 class MessengerServer: public MThread, public MessengerEntity {
 	bool _running;
 	std::string _pathToUsersFile;
@@ -21,13 +19,28 @@ class MessengerServer: public MThread, public MessengerEntity {
 	// Create a session between two users
 	void createSession(User* initiatingUser, User* targetUser);
 
+	// Handles the users requests
+	void run();
+
 public:
 
 	MessengerServer(const std::string& pathToUsersFile);
 	virtual ~MessengerServer();
 
-	// Handles the users requests
-	void run();
+	// Print List of users from login file
+	void listUsers();
+
+	// Print List of the connected users
+	int listConnectedUsers();
+
+	// get list of all open sessions
+	void listSessions();
+
+	// Print list of all chat rooms
+	void listChatRooms();
+
+	// Print list of users in a specific room
+	int listChatRoomUsers(string ChatRoomName);
 
 	// add user to users map
 	bool addUser(TCPSocket* userSocket, std::string LoginUserName);
@@ -48,33 +61,16 @@ public:
 	// returns the number of registered users
 	int numOfUsersFromFile();
 
-	//int  numOfUserFromList();
-
-	// Print List of the connected users
-	int listConnectedUsers();
-
 	// Send list of the connected users to the asking client
 	int getListConnectedUsers(User *client);
 
 	bool isConnected(string username);
 
-	// get list of all open sessions
-	void listSessions();
-
-	// Print list of all chat rooms
-	void listRooms();
-
 	// Send  list of chat rooms to the asking client
 	void getListRooms(User *clientName);
 
-	// Print list of users in a specific room
-	int listChatUsers(string ChatRoomName);
-
 	// Send list of users in a specific room to the asking client
 	int getListChatUsers(User *clientName);
-
-	// Print List of users from login file
-	void listUsers();
 
 	// Send List of users from login file to asking client
 	void getListUsers(User *clientName);
@@ -87,7 +83,6 @@ public:
 
 	// login to chat room
 	void loginChatRoom(User* creator);
-
 };
 
 #endif /* MESSENGERSERVER_H_ */

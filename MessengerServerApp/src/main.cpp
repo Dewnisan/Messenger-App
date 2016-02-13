@@ -39,11 +39,11 @@ int main() {
 		} else if (command == "ls") {
 			messengerServer.listSessions();
 		} else if (command == "lr") {
-			messengerServer.listRooms();
+			messengerServer.listChatRooms();
 		} else if (command == "lru") {
 			string chatRoomName;
 			cin >> chatRoomName;
-			messengerServer.listChatUsers(chatRoomName);
+			messengerServer.listChatRoomUsers(chatRoomName);
 		} else if (command == "x") {
 			cout << "Server is shutting down..." << endl;
 			running = false;
