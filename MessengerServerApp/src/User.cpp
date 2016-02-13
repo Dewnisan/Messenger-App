@@ -1,32 +1,23 @@
 #include "MessengerServer.h"
 #include "TCPMessengerProtocolExtentions.h"
+
 #include "User.h"
 
+using namespace std;
+
 User::User(string name, TCPSocket* sock) :
-		_sock(sock) {
-	string tempPort;
+		_name(name), _inSession(false), _inChatRoom(false), _sock(sock), _chatPartner(NULL), _chatRoom(NULL) {
 	istringstream liness(_sock->destIpAndPort());
 	getline(liness, _ip, ':');
-	getline(liness, tempPort, ':');
-	_port = atoi(tempPort.c_str());
 
-	_inChatRoom = false;
-	_inSession = false;
-	_name = name;
-	_chatRoom = NULL;
-	_ChatPartner = NULL;
+	string tempPort;
+	getline(liness, tempPort, ':');
+
+	_port = atoi(tempPort.c_str());
 }
 
 User::~User() {
 	delete (_sock);
-}
-
-TCPSocket* User::getSocket() {
-	return _sock;
-}
-
-bool User::inChat() {
-	return (inChatRoom() || inSession());
 }
 
 bool User::inChatRoom() {
@@ -37,38 +28,70 @@ bool User::inSession() {
 	return _inSession;
 }
 
-void User::loginUsertoSession(User* partner) {
-	_inSession = true;
-	_ChatPartner = partner;
-
+bool User::isConversing() {
+	return (inChatRoom() || inSession());
 }
 
-void User::disconnectFromChatRom(bool fromchatroom) {
-	if (inChatRoom()) {
-		if (!fromchatroom)
-			_chatRoom->logOffUser(this);
-		writeCommand(CHAT_ROOM_USER_LEFT);
-		_chatRoom = NULL;
-		_inChatRoom = false;
+string User::getName() {
+	return _name;
+}
+
+string User::getIp() {
+	return _ip;
+}
+
+int User::getPort() {
+	return _port;
+}
+
+ChatRoom* User::getChatRoom() {
+	return _chatRoom;
+}
+
+void User::pairToSession(User* partner) {
+	_inSession = true;
+	_chatPartner = partner;
+}
+
+bool User::closeSession(bool isInitiating) {
+	if (!inSession()) {
+		return true;
 	}
 
+	if (isInitiating) {
+		_chatPartner->closeSession(false);
+	}
+
+	writeCommand(SESSION_CLOSED);
+	_inSession = false;
+	_chatPartner = NULL;
+
+	return true;
 }
 
-void User::loginUserToChatRoom(ChatRoom* logToRoom) {
+void User::enterToChatRoom(ChatRoom* logToRoom) {
 	_inChatRoom = true;
 	_chatRoom = logToRoom;
 }
 
-bool User::closeSession(bool isinitiating) {
-	if (!inSession())
-		return true;
-	if (isinitiating)
-		_ChatPartner->closeSession(false);
+void User::exitChatRoom(bool fromChatRoom) {
+	if (inChatRoom()) {
+		if (!fromChatRoom) { // TODO: what gives?
+			_chatRoom->logOffUser(this);
+		}
 
-	writeCommand(SESSION_CLOSED);
-	_inSession = false;
-	_ChatPartner = NULL;
-	return true;
+		writeCommand(CHAT_ROOM_USER_LEFT);
+		_chatRoom = NULL;
+		_inChatRoom = false;
+	}
+}
+
+TCPSocket* User::getSocket() {
+	return _sock;
+}
+
+string User::getDestAndPort() {
+	return _sock->destIpAndPort();
 }
 
 int User::readCommand() {
@@ -85,24 +108,4 @@ void User::writeMsg(string msg) {
 
 void User::writeCommand(int command) {
 	MessengerServer::sendCommandToPeer(_sock, command);
-}
-
-string User::getDestandport() {
-	return _sock->destIpAndPort();
-}
-
-string User::getusername() {
-	return _name;
-}
-
-string User::getIP() {
-	return _ip;
-}
-
-int User::getport() {
-	return _port;
-}
-
-ChatRoom* User::getChatRoom() {
-	return _chatRoom;
 }

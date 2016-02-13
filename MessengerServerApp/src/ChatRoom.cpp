@@ -10,7 +10,7 @@ ChatRoom::~ChatRoom() {
 
 	for(vector<User*>::iterator iter = charRoomUsers.begin(); iter != charRoomUsers.end(); iter++)
 	{
-		(*iter)->disconnectFromChatRom(true);
+		(*iter)->exitChatRoom(true);
 	}
 }
 
@@ -24,9 +24,9 @@ void ChatRoom::updateusers()
 
 		for(vector<User*>::iterator iter2 = charRoomUsers.begin(); iter2 != charRoomUsers.end(); iter2++)
 		{
-			(*iter)->writeMsg((*iter2)->getusername());
-			(*iter)->writeMsg((*iter2)->getIP());
-			(*iter)->writeCommand((*iter2)->getport());
+			(*iter)->writeMsg((*iter2)->getName());
+			(*iter)->writeMsg((*iter2)->getIp());
+			(*iter)->writeCommand((*iter2)->getPort());
 		}
 	}
 }
@@ -36,7 +36,7 @@ int ChatRoom::printUsers()
 	int count = 0;
 	for(vector<User*>::iterator iter = charRoomUsers.begin(); iter != charRoomUsers.end(); iter++)
 	{
-		cout<<(*iter)->getusername()<<endl;
+		cout<<(*iter)->getName()<<endl;
 		count++;
 	}
 	return count;
@@ -51,7 +51,7 @@ int ChatRoom::sendUserList(User *sendto)
 	sendto->writeCommand(charRoomUsers.size());
 	for(vector<User*>::iterator iter = charRoomUsers.begin(); iter != charRoomUsers.end(); iter++)
 	{
-		sendto->writeMsg((*iter)->getusername());
+		sendto->writeMsg((*iter)->getName());
 		numOfUsers++;
 	}
 

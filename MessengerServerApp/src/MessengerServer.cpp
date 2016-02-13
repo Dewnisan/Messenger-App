@@ -68,21 +68,21 @@ void MessengerServer::readFromChatRoom(User *clientName) {
 
 void MessengerServer::createSession(User* fromUser, User* toUser) {
 	// login the two users
-	toUser->loginUsertoSession(fromUser);
-	fromUser->loginUsertoSession(toUser);
+	toUser->pairToSession(fromUser);
+	fromUser->pairToSession(toUser);
 
 	// send communication details
 	toUser->writeCommand(SESSION_ESTABLISHED);
-	toUser->writeMsg(fromUser->getusername());
-	toUser->writeMsg(fromUser->getIP());
-	toUser->writeCommand(fromUser->getport());
-	toUser->writeCommand(toUser->getport());
+	toUser->writeMsg(fromUser->getName());
+	toUser->writeMsg(fromUser->getIp());
+	toUser->writeCommand(fromUser->getPort());
+	toUser->writeCommand(toUser->getPort());
 
 	fromUser->writeCommand(SESSION_ESTABLISHED);
-	fromUser->writeMsg(toUser->getusername());
-	fromUser->writeMsg(toUser->getIP());
-	fromUser->writeCommand(toUser->getport());
-	fromUser->writeCommand(fromUser->getport());
+	fromUser->writeMsg(toUser->getName());
+	fromUser->writeMsg(toUser->getIp());
+	fromUser->writeCommand(toUser->getPort());
+	fromUser->writeCommand(fromUser->getPort());
 }
 
 void MessengerServer::run() {
@@ -125,13 +125,13 @@ void MessengerServer::run() {
 				currUser->writeCommand(SESSION_CREATE_REFUSED);
 				currUser->writeMsg(string("there is no such user"));
 				break;
-			} else if (_users[msg]->inChat()) {
+			} else if (_users[msg]->isConversing()) {
 				currUser->writeCommand(SESSION_CREATE_REFUSED);
 				currUser->writeMsg(string("the wanted user is in chat"));
 				break;
 			}
 			createSession(currUser, _users[msg]);
-			cout << "Session was created between: " << currUser->getusername() << " AND " << msg << endl;
+			cout << "Session was created between: " << currUser->getName() << " AND " << msg << endl;
 			break;
 		case EXIT:
 			exitServer(currUser);
@@ -149,7 +149,7 @@ void MessengerServer::run() {
 			enterChatRoom(currUser);
 			break;
 		case CHAT_ROOM_EXIT:
-			currUser->disconnectFromChatRom(false);
+			currUser->exitChatRoom(false);
 			break;
 		case LIST_CONNECTED_USERS:
 			sendListConnectedUsers(currUser);
@@ -304,8 +304,8 @@ void MessengerServer::exitServer(User* client) {
 //	client->closeSession(true);
 //	client->disconnectFromChatRom(false);
 
-	cout << "The user: " << client->getusername() << " was disconnected" << endl;
-	_users.erase(client->getusername());
+	cout << "The user: " << client->getName() << " was disconnected" << endl;
+	_users.erase(client->getName());
 }
 
 void MessengerServer::createChatRoom(User* creator) {
@@ -348,7 +348,7 @@ void MessengerServer::deleteChatRoom(User* creator) {
 		creator->writeCommand(CHAT_ROOM_UNCLOSED);
 	}
 
-	if (_chatRooms[msg]->getOwner()->getusername() == creator->getusername()) {
+	if (_chatRooms[msg]->getOwner()->getName() == creator->getName()) {
 		delete (_chatRooms[msg]);
 		creator->writeCommand(CHAT_ROOM_CLOSED);
 		_chatRooms.erase(msg);
@@ -373,11 +373,11 @@ void MessengerServer::enterChatRoom(User* loginUser) {
 		return;
 	}
 
-	loginUser->loginUserToChatRoom(_chatRooms[roomName]);
+	loginUser->enterToChatRoom(_chatRooms[roomName]);
 	if (_chatRooms[roomName]->addUser(loginUser)) // addUser of ChatRoom
 			{
 		loginUser->writeCommand(CHAT_ROOM_USER_ENTERED);
-		loginUser->writeCommand(loginUser->getport());
+		loginUser->writeCommand(loginUser->getPort());
 	} else {
 		loginUser->writeCommand(CHAT_ROOM_ENTERING_DENIED);
 		loginUser->writeMsg(string("you are already logged in"));

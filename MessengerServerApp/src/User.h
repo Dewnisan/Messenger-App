@@ -17,32 +17,39 @@ class User {
 	string _name;
 	string _ip;
 	int _port;
-	bool _inChatRoom;
+
 	bool _inSession;
+	bool _inChatRoom;
+
 	TCPSocket* _sock;
-	User *_ChatPartner;
+
+	User *_chatPartner;
 	ChatRoom *_chatRoom;
 
 public:
-	User(string name, TCPSocket* basesock);
+	User(string name, TCPSocket* sock);
 	virtual ~User();
 
 	// User related functions
-	bool inChat();
 	bool inSession();
 	bool inChatRoom();
-	void loginUsertoSession(User* partner);
-	void loginUserToChatRoom(ChatRoom* name);
-	void disconnectFromChatRom(bool fromchatroom);
-	bool closeSession(bool isinitiating);
-	string getusername();
-	string getIP();
-	int getport();
+	bool isConversing();
+
+	string getName();
+	string getIp();
+	int getPort();
 	ChatRoom* getChatRoom();
+
+	void pairToSession(User* partner);
+	bool closeSession(bool isInitiating);
+
+	void enterToChatRoom(ChatRoom* name);
+	void exitChatRoom(bool fromChatRoom);
 
 	// Socket related functions
 	TCPSocket* getSocket();
-	string getDestandport();
+	string getDestAndPort();
+
 	int readCommand();
 	string readMsg();
 	void writeMsg(string msg);
