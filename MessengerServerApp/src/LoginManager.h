@@ -6,7 +6,6 @@
 
 #include "MessengerServer.h"
 #include "MThread.h"
-#include "TCPMessengerProtocol.h"
 #include "TCPSocket.h"
 
 // Handles the login and registration requests

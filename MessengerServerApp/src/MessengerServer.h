@@ -5,7 +5,6 @@
 #include <string>
 
 #include "MThread.h"
-#include "TCPMessengerProtocol.h"
 #include "TCPSocket.h"
 #include "User.h"
 

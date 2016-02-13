@@ -9,7 +9,6 @@
 #include <string>
 
 #include "ChatRoom.h"
-#include "TCPMessengerProtocol.h"
 #include "TCPSocket.h"
 
 class ChatRoom;

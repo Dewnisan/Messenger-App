@@ -2,6 +2,7 @@
 
 #include "LoginManager.h"
 #include "MultipleTCPSocketsListener.h"
+#include "TCPMessengerProtocolExtentions.h"
 
 using namespace std;
 
@@ -78,7 +79,13 @@ LoginManager::~LoginManager() {
 void LoginManager::run() {
 	while (_running) {
 		MultipleTCPSocketsListener multipleSocketsListener;
-		multipleSocketsListener.addSockets(_peers);
+
+		vector<TCPSocket*> sockets;
+		for (map<std::string, TCPSocket*>::iterator iter = _peers.begin(); iter != _peers.end(); iter++) {
+			sockets.push_back(iter->second);
+		}
+
+		multipleSocketsListener.addSockets(sockets);
 
 		TCPSocket* readySock = multipleSocketsListener.listenToSocket(2);
 		if (readySock == NULL) {
@@ -107,13 +114,13 @@ void LoginManager::run() {
 			}
 			break;
 
-		case SIGNUP_REQUEST:
+		case REGISTRATION_REQUEST:
 			username = readySock->readMsg();
 			password = readySock->readMsg();
 			if (signUp(username, password)) {
-				readySock->writeCommand(SIGNUP_REQUEST_APPROVED);
+				readySock->writeCommand(REGISTRATION_REQUEST_APPROVED);
 			} else {
-				readySock->writeCommand(SIGNUP_REQUEST_DENIED);
+				readySock->writeCommand(REGISTRATION_REQUEST_DENIED);
 			}
 			break;
 

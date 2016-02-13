@@ -1,3 +1,4 @@
+#include "TCPMessengerProtocolExtentions.h"
 #include "User.h"
 
 User::User(string name, TCPSocket* sock) :
@@ -45,7 +46,7 @@ void User::disconnectFromChatRom(bool fromchatroom) {
 	if (inChatRoom()) {
 		if (!fromchatroom)
 			_chatRoom->logOffUser(this);
-		writeCommand(CHAT_ROOM_LEAVED);
+		writeCommand(CHAT_ROOM_USER_LEFT);
 		_chatRoom = NULL;
 		_inChatRoom = false;
 	}

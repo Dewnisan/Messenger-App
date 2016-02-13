@@ -2,6 +2,7 @@
 
 #include "MessengerServer.h"
 #include "MultipleTCPSocketsListener.h"
+#include "TCPMessengerProtocolExtentions.h"
 
 using namespace std;
 
@@ -43,10 +44,10 @@ void MessengerServer::run() {
 		MultipleTCPSocketsListener multipleSocketsListener;
 
 		// Convert User to socket before adding to list
-		map<string, TCPSocket*> sockets;
+		vector<TCPSocket*> sockets;
 		for (map<string, User*>::iterator iter = _users.begin();
 				iter != _users.end(); iter++) {
-			sockets[iter->first] = (iter->second->getSocket());
+			sockets.push_back(iter->second->getSocket());
 		}
 
 		// Add sockets
@@ -111,10 +112,10 @@ void MessengerServer::run() {
 		case LIST_CONNECTED_USERS:
 			getListConnectedUsers(currUser);
 			break;
-		case LIST_ROOMS:
+		case LIST_CHAT_ROOMS:
 			getListRooms(currUser);
 			break;
-		case LIST_CONNECTED_USERS_IN_ROOM:
+		case LIST_CONNECTED_USERS_IN_CHAT_ROOM:
 			getListChatUsers(currUser);
 			break;
 		case LIST_USERS:
@@ -205,7 +206,7 @@ void MessengerServer::listRooms() {
 
 // Send  list of chat rooms to the asking client
 void MessengerServer::getListRooms(User *client) {
-	client->writeCommand(LIST_ROOMS);
+	client->writeCommand(LIST_CHAT_ROOMS);
 	client->writeCommand(_chatRooms.size());
 
 	this->readfromChatRoom(client);
@@ -239,7 +240,7 @@ int MessengerServer::getListChatUsers(User *client) {
 	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin();
 			iter != _chatRooms.end(); iter++) {
 		if (ChatRoomName == iter->first) {
-			client->writeCommand(LIST_CONNECTED_USERS_IN_ROOM);
+			client->writeCommand(LIST_CONNECTED_USERS_IN_CHAT_ROOM);
 			(iter)->second->sendUserList(client);
 			break;
 		}
@@ -344,7 +345,7 @@ void MessengerServer::loginChatRoom(User* loginUser) {
 	}
 
 	if (!exist) {
-		loginUser->writeCommand(CHAT_ROOM_LOGED_IN_DENIED);
+		loginUser->writeCommand(CHAT_ROOM_ENTERING_DENIED);
 		loginUser->writeMsg(string("Room does not exist"));
 		return;
 	}
@@ -352,10 +353,10 @@ void MessengerServer::loginChatRoom(User* loginUser) {
 	loginUser->loginUserToChatRoom(_chatRooms[roomName]);
 	if (_chatRooms[roomName]->addUser(loginUser)) // addUser of ChatRoom
 			{
-		loginUser->writeCommand(CHAT_ROOM_LOGED_IN);
+		loginUser->writeCommand(CHAT_ROOM_USER_ENTERED);
 		loginUser->writeCommand(loginUser->getport());
 	} else {
-		loginUser->writeCommand(CHAT_ROOM_LOGED_IN_DENIED);
+		loginUser->writeCommand(CHAT_ROOM_ENTERING_DENIED);
 		loginUser->writeMsg(string("you are already logged in"));
 	}
 }

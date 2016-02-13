@@ -1,4 +1,5 @@
 #include "ChatRoom.h"
+#include "TCPMessengerProtocolExtentions.h"
 
 ChatRoom::ChatRoom(User* owner, string chatRoom) {
 	_roomOwner = owner;
