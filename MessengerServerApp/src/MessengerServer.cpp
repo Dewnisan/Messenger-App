@@ -45,8 +45,7 @@ void MessengerServer::run() {
 
 		// Convert User to socket before adding to list
 		vector<TCPSocket*> sockets;
-		for (map<string, User*>::iterator iter = _users.begin();
-				iter != _users.end(); iter++) {
+		for (map<string, User*>::iterator iter = _users.begin(); iter != _users.end(); iter++) {
 			sockets.push_back(iter->second->getSocket());
 		}
 
@@ -61,8 +60,7 @@ void MessengerServer::run() {
 
 		// Find matching user
 		User* currUser = NULL;
-		for (map<string, User*>::iterator iter = _users.begin();
-				iter != _users.end(); iter++) {
+		for (map<string, User*>::iterator iter = _users.begin(); iter != _users.end(); iter++) {
 			if (readySock == iter->second->getSocket()) {
 				currUser = iter->second;
 				break;
@@ -88,8 +86,7 @@ void MessengerServer::run() {
 				break;
 			}
 			createSession(currUser, _users[msg]);
-			cout << "Session was created between: " << currUser->getusername()
-					<< " AND " << msg << endl;
+			cout << "Session was created between: " << currUser->getusername() << " AND " << msg << endl;
 			break;
 		case EXIT:
 			exitServer(currUser);
@@ -125,7 +122,6 @@ void MessengerServer::run() {
 	}
 }
 
-// add user to users map
 bool MessengerServer::addUser(TCPSocket* userSocket, string LoginUserName) {
 	bool added = true;
 	User* userToAdd = new User(LoginUserName, userSocket);
@@ -136,7 +132,6 @@ bool MessengerServer::addUser(TCPSocket* userSocket, string LoginUserName) {
 	return added;
 }
 
-// Print List of the connected users
 int MessengerServer::listConnectedUsers() {
 	if (_users.begin() == _users.end()) {
 		cout << "There aren't any users connected" << endl;
@@ -157,7 +152,6 @@ int MessengerServer::listConnectedUsers() {
 	return count;
 }
 
-// Send list of the connected users to the asking client
 int MessengerServer::getListConnectedUsers(User *client) {
 	client->writeCommand(LIST_CONNECTED_USERS);
 	client->writeCommand(_users.size());
@@ -181,7 +175,6 @@ bool MessengerServer::isConnected(string username) {
 	return true;
 }
 
-// get list of all open sessions
 void MessengerServer::listSessions() {
 	cout << "All the connected users that in Session:" << endl;
 	std::map<string, User*>::iterator iter;
@@ -195,7 +188,6 @@ void MessengerServer::listSessions() {
 	}
 }
 
-// Print list of all chat rooms
 void MessengerServer::listRooms() {
 	if (_chatRooms.begin() != _chatRooms.end()) {
 		cout << "the rooms list:" << endl;
@@ -204,7 +196,6 @@ void MessengerServer::listRooms() {
 		cout << "There are no rooms yet" << endl;
 }
 
-// Send  list of chat rooms to the asking client
 void MessengerServer::getListRooms(User *client) {
 	client->writeCommand(LIST_CHAT_ROOMS);
 	client->writeCommand(_chatRooms.size());
@@ -212,7 +203,6 @@ void MessengerServer::getListRooms(User *client) {
 	this->readfromChatRoom(client);
 }
 
-// Print list of users in a specific room
 int MessengerServer::listChatUsers(string ChatRoomName) {
 	int numOfUsers;
 	if (_chatRooms.find(ChatRoomName) == _chatRooms.end()) {
@@ -220,8 +210,7 @@ int MessengerServer::listChatUsers(string ChatRoomName) {
 		return 0;
 	}
 	cout << "Users list in Room:" << endl;
-	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin();
-			iter != _chatRooms.end(); iter++) {
+	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
 		if (ChatRoomName == iter->first) {
 			numOfUsers = iter->second->printUsers();
 		}
@@ -233,12 +222,10 @@ int MessengerServer::listChatUsers(string ChatRoomName) {
 	return numOfUsers;
 }
 
-// Send list of users in a specific room to the asking client
 int MessengerServer::getListChatUsers(User *client) {
 	int numOfUsers = 0;
 	string ChatRoomName = client->readMsg();
-	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin();
-			iter != _chatRooms.end(); iter++) {
+	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
 		if (ChatRoomName == iter->first) {
 			client->writeCommand(LIST_CONNECTED_USERS_IN_CHAT_ROOM);
 			(iter)->second->sendUserList(client);
@@ -248,7 +235,6 @@ int MessengerServer::getListChatUsers(User *client) {
 	return numOfUsers;
 }
 
-// Send List of users from login file to asking client
 void MessengerServer::getListUsers(User *client) {
 	int numOfusers = 0;
 	numOfusers = numOfUsersFromFile();
@@ -263,31 +249,26 @@ void MessengerServer::getListUsers(User *client) {
 
 }
 
-// Print List of users from login file
 void MessengerServer::listUsers() {
-	cout << "the users:" << endl;
+	cout << "The users:" << endl;
 	readFromFile(NULL); // To server
 }
 
-// user exit from the server
 void MessengerServer::exitServer(User* clientName) {
 	//clientName->closeSession(true);
 	//clientName->disconnectFromChatRom(false);
 
-	cout << "the User: " << clientName->getusername() << " was  disconnect"
-			<< endl;
+	cout << "the User: " << clientName->getusername() << " was  disconnect" << endl;
 	_users.erase(clientName->getusername());
 }
 
-// Create new chat room
 void MessengerServer::createChatRoom(User* creator) {
 	string msg;
 	bool exist = false;
 	msg = creator->readMsg();
 
 	// Checking that the name does not exist
-	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin();
-			iter != _chatRooms.end(); iter++) {
+	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
 		if (iter->first == msg) {
 			exist = true;
 		}
@@ -305,15 +286,13 @@ void MessengerServer::createChatRoom(User* creator) {
 	cout << "Room : " << msg << " was created" << endl;
 }
 
-// delete chat room
 void MessengerServer::deleteChatRoom(User* creator) {
 	string msg;
 	msg = creator->readMsg();
 
 	bool exist = false;
 
-	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin();
-			iter != _chatRooms.end(); iter++) {
+	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
 		if (iter->first == msg) {
 			exist = true;
 		}
@@ -333,12 +312,10 @@ void MessengerServer::deleteChatRoom(User* creator) {
 
 }
 
-// login to chat room
 void MessengerServer::loginChatRoom(User* loginUser) {
 	string roomName = loginUser->readMsg();
 	bool exist = false;
-	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin();
-			iter != _chatRooms.end(); iter++) {
+	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
 		if (iter->first == roomName) {
 			exist = true;
 		}
@@ -361,7 +338,6 @@ void MessengerServer::loginChatRoom(User* loginUser) {
 	}
 }
 
-// returns the number of registered users
 int MessengerServer::numOfUsersFromFile() {
 	string line;
 	fstream loginFile;
@@ -378,7 +354,6 @@ int MessengerServer::numOfUsersFromFile() {
 	return counter;
 }
 
-// print/send all the users that are registered (in the file)
 void MessengerServer::readFromFile(User *clientName) {
 	string line;
 	fstream loginFile;
@@ -407,11 +382,9 @@ void MessengerServer::printToSreen(string msgToScreen) {
 	cout << msgToScreen << endl;
 }
 
-// print/send all the rooms
 void MessengerServer::readfromChatRoom(User *clientName) {
 	string name;
-	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin();
-			iter != _chatRooms.end(); iter++) {
+	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
 		name = iter->first;
 		if (clientName != NULL) {
 			clientName->writeMsg(name); // send to client who requested

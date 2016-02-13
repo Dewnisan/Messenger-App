@@ -12,9 +12,9 @@
 #include "TCPSocket.h"
 
 class Listener: public MThread {
+	bool _running;
 	LoginManager* _loginManager;
 	TCPSocket* _clientSocket;
-	bool _running;
 
 public:
 
