@@ -300,10 +300,11 @@ void MessengerServer::sendListUsers(User *client) {
 }
 
 void MessengerServer::exitServer(User* client) {
-	//clientName->closeSession(true);
-	//clientName->disconnectFromChatRom(false);
+	// TODO: what about these?
+//	client->closeSession(true);
+//	client->disconnectFromChatRom(false);
 
-	cout << "The user: " << client->getusername() << " was disconnect" << endl;
+	cout << "The user: " << client->getusername() << " was disconnected" << endl;
 	_users.erase(client->getusername());
 }
 
