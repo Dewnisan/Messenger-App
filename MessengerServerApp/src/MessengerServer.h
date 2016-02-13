@@ -11,10 +11,22 @@
 
 class MessengerServer: public MThread, public MessengerEntity {
 	bool _running;
-	std::string _pathToUsersFile;
+	std::string _pathToUsersFile; // TODO: add locking to file
 
-	std::map<std::string, User*> _users; // map of logged in users
+	std::map<std::string, User*> _users; // pool of logged in users
 	std::map<std::string, ChatRoom*> _chatRooms;
+
+
+	void printToScreen(string msgToScreen);
+
+	// Returns the number of registered users
+	int numOfUsersFromFile();
+
+	// Prints/sends the names of all the users that are registered
+	void readFromFile(User *clientName);
+
+	// Prints/sends the names of all the chat rooms that exists
+	void readFromChatRoom(User *clientName);
 
 	// Create a session between two users
 	void createSession(User* initiatingUser, User* targetUser);
@@ -27,62 +39,49 @@ public:
 	MessengerServer(const std::string& pathToUsersFile);
 	virtual ~MessengerServer();
 
-	// Print List of users from login file
+	// Prints List of users from login file
 	void listUsers();
 
-	// Print List of the connected users
-	int listConnectedUsers();
+	// Prints List of the connected users
+	void listConnectedUsers();
 
-	// get list of all open sessions
+	// Prints list of all open sessions
 	void listSessions();
 
-	// Print list of all chat rooms
+	// Prints list of all chat rooms
 	void listChatRooms();
 
-	// Print list of users in a specific room
-	int listChatRoomUsers(string ChatRoomName);
+	// Prints list of users in a specific chat room
+	void listChatRoomUsers(string chatRoomName);
 
-	// add user to users map
-	bool addUser(TCPSocket* userSocket, std::string LoginUserName);
-
-	// user exit from the server
-	void exitServer(User* clientName);
-
-	// print/send all the users that are registered (in the file)
-	void readFromFile(User *clientName);
-
-	// print/send all the rooms
-	void readfromChatRoom(User *clientName);
-
-	//void readfromUsers(User *clientName);
-
-	void printToSreen(string msgToScreen);
-
-	// returns the number of registered users
-	int numOfUsersFromFile();
+	// Adds user to users pool
+	bool addUser(TCPSocket* userSocket, std::string userName);
 
 	// Send list of the connected users to the asking client
-	int getListConnectedUsers(User *client);
+	void sendListConnectedUsers(User *client);
 
-	bool isConnected(string username);
+	bool isConnected(string userName);
 
-	// Send  list of chat rooms to the asking client
-	void getListRooms(User *clientName);
+	// Send list of chat rooms to the asking client
+	void sendListChatRooms(User *client);
 
-	// Send list of users in a specific room to the asking client
-	int getListChatUsers(User *clientName);
+	// Send list of users in a specific chat room to the asking client
+	void sendListChatRoomUsers(User *client);
 
 	// Send List of users from login file to asking client
-	void getListUsers(User *clientName);
+	void sendListUsers(User *clientName);
+
+	// User exit from the server
+	void exitServer(User* client);
 
 	// Create new chat room
 	void createChatRoom(User* creator);
 
-	// delete chat room
+	// Delete chat room
 	void deleteChatRoom(User* creator);
 
-	// login to chat room
-	void loginChatRoom(User* creator);
+	// Enter to chat room
+	void enterChatRoom(User* creator);
 };
 
 #endif /* MESSENGERSERVER_H_ */

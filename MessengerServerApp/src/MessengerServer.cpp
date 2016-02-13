@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 
 #include "MessengerServer.h"
@@ -5,6 +6,65 @@
 #include "TCPMessengerProtocolExtentions.h"
 
 using namespace std;
+
+void MessengerServer::printToScreen(string msgToScreen) {
+	cout << msgToScreen << endl;
+}
+
+int MessengerServer::numOfUsersFromFile() {
+	fstream loginFile;
+	loginFile.open(_pathToUsersFile.c_str(), ios::in | ios::out | ios::binary);
+
+	int counter = 0;
+	while (!loginFile.eof()) {
+		string line;
+		getline(loginFile, line);
+		counter++;
+	}
+
+	loginFile.close();
+
+	return counter;
+}
+
+void MessengerServer::readFromFile(User *clientName) {
+	fstream loginFile;
+	loginFile.open(_pathToUsersFile.c_str(), ios::in | ios::out | ios::binary);
+
+	if (loginFile.is_open()) {
+		while (!loginFile.eof()) {
+			string line;
+			getline(loginFile, line);
+
+			istringstream liness(line);
+			string userFromFile;
+			getline(liness, userFromFile, '-');
+
+			if (clientName != NULL) {
+				clientName->writeMsg(userFromFile); // Send to client who requested
+			} else {
+				printToScreen(userFromFile); // Print on server's screen
+			}
+
+		}
+
+		loginFile.close();
+	} else {
+		printToScreen("Error - could not open the file");
+	}
+}
+
+void MessengerServer::readFromChatRoom(User *clientName) {
+	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
+		string name = iter->first;
+
+		if (clientName != NULL) {
+			clientName->writeMsg(name); // send to client who requested
+		} else {
+			printToScreen(name); // Print on server's screen
+		}
+	}
+}
 
 void MessengerServer::createSession(User* fromUser, User* toUser) {
 	// login the two users
@@ -59,9 +119,6 @@ void MessengerServer::run() {
 		// Read command from the user
 		int command = currUser->readCommand();
 		switch (command) {
-		case 0:
-			exitServer(currUser);
-			break;
 		case SESSION_CREATE:
 			msg = currUser->readMsg(); // the partner name
 			if (!_users[msg]) {
@@ -89,22 +146,22 @@ void MessengerServer::run() {
 			deleteChatRoom(currUser);
 			break;
 		case CHAT_ROOM_LOGIN:
-			loginChatRoom(currUser);
+			enterChatRoom(currUser);
 			break;
 		case CHAT_ROOM_EXIT:
 			currUser->disconnectFromChatRom(false);
 			break;
 		case LIST_CONNECTED_USERS:
-			getListConnectedUsers(currUser);
+			sendListConnectedUsers(currUser);
 			break;
 		case LIST_CHAT_ROOMS:
-			getListRooms(currUser);
+			sendListChatRooms(currUser);
 			break;
 		case LIST_CONNECTED_USERS_IN_CHAT_ROOM:
-			getListChatUsers(currUser);
+			sendListChatRoomUsers(currUser);
 			break;
 		case LIST_USERS:
-			getListUsers(currUser);
+			sendListUsers(currUser);
 			break;
 		}
 	}
@@ -112,9 +169,8 @@ void MessengerServer::run() {
 
 MessengerServer::MessengerServer(const std::string& pathToUsersFile) :
 		_running(false), _pathToUsersFile(pathToUsersFile) {
-
 	start();
-	cout << "Messenger server is up" << endl;
+	cout << "Server is up" << endl;
 }
 
 MessengerServer::~MessengerServer() {
@@ -123,143 +179,132 @@ MessengerServer::~MessengerServer() {
 }
 
 void MessengerServer::listUsers() {
-	cout << "The users:" << endl;
+	cout << "Users:" << endl;
 	readFromFile(NULL); // To server
 }
 
-int MessengerServer::listConnectedUsers() {
-	if (_users.begin() == _users.end()) {
+void MessengerServer::listConnectedUsers() {
+	if (_users.empty()) {
 		cout << "There aren't any users connected" << endl;
-		return 0;
+		return;
 	}
 
-	cout << "The Connected users are:" << endl;
-
-	map<string, User*>::iterator iter;
-
-	string name;
-	int count = 0;
-	for (iter = _users.begin(); iter != _users.end(); iter++) {
-		name = iter->first;
-		printToSreen(name);
-		count++;
+	cout << "Connected users:" << endl;
+	for (map<string, User*>::iterator iter = _users.begin(); iter != _users.end(); iter++) {
+		string name = iter->first;
+		printToScreen(name);
 	}
-	return count;
 }
 
 void MessengerServer::listSessions() {
-	cout << "All the connected users that in Session:" << endl;
-	std::map<string, User*>::iterator iter;
+	cout << "Connected users that in session:" << endl;
 
-	string name;
-	for (iter = _users.begin(); iter != _users.end(); iter++) {
+	for (map<string, User*>::iterator iter = _users.begin(); iter != _users.end(); iter++) {
 		if (iter->second->inSession()) {
-			name = iter->first;
-			printToSreen(name);
+			string name = iter->first;
+			printToScreen(name);
 		}
 	}
 }
 
 void MessengerServer::listChatRooms() {
-	if (_chatRooms.begin() != _chatRooms.end()) {
-		cout << "the rooms list:" << endl;
-		this->readfromChatRoom(NULL);
-	} else
-		cout << "There are no rooms yet" << endl;
+	if (_chatRooms.empty()) {
+		cout << "There are no chat rooms yet" << endl;
+		return;
+	}
+
+	cout << "Chat rooms:" << endl;
+	readFromChatRoom(NULL);
 }
 
-int MessengerServer::listChatRoomUsers(string ChatRoomName) {
-	int numOfUsers;
-	if (_chatRooms.find(ChatRoomName) == _chatRooms.end()) {
-		cout << "No such room: " << ChatRoomName << endl;
-		return 0;
+void MessengerServer::listChatRoomUsers(string chatRoomName) {
+	if (_chatRooms.find(chatRoomName) == _chatRooms.end()) {
+		cout << "No such chat room: " << chatRoomName << endl;
+		return;
 	}
-	cout << "Users list in Room:" << endl;
+
+	cout << "Users in chat room:" << endl;
+	int numOfUsers = 0;
 	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
-		if (ChatRoomName == iter->first) {
+		if (chatRoomName == iter->first) {
 			numOfUsers = iter->second->printUsers();
 		}
 	}
 
-	if (numOfUsers == 0)
-		cout << "There are no users in this room" << endl;
-
-	return numOfUsers;
+	if (numOfUsers == 0) {
+		cout << "There are no users in this chat room" << endl;
+	}
 }
 
-bool MessengerServer::addUser(TCPSocket* userSocket, string LoginUserName) {
-	bool added = true;
-	User* userToAdd = new User(LoginUserName, userSocket);
+bool MessengerServer::addUser(TCPSocket* userSocket, string userName) {
+	User* userToAdd = new User(userName, userSocket);
 
-	_users.insert(pair<string, User*>(LoginUserName, userToAdd));
-	cout << LoginUserName << " has logged in" << endl;
+	pair<map<string, User*>::iterator, bool> ret = _users.insert(pair<string, User*>(userName, userToAdd));
 
-	return added;
+	if (ret.second) {
+		cout << userName << " has logged in" << endl;
+	} else {
+		cout << "Could not add the user " + userName + " to users pool" << endl;
+	}
+
+	return ret.second;
 }
 
-int MessengerServer::getListConnectedUsers(User *client) {
+void MessengerServer::sendListConnectedUsers(User *client) {
 	client->writeCommand(LIST_CONNECTED_USERS);
 	client->writeCommand(_users.size());
 
-	map<string, User*>::iterator iter;
-
-	string name;
-	int count = 0;
-	for (iter = _users.begin(); iter != _users.end(); iter++) {
-		name = iter->first;
+	for (map<string, User*>::iterator iter = _users.begin(); iter != _users.end(); iter++) {
+		string name = iter->first;
 		client->writeMsg(name);
-		count++;
 	}
-
-	return count;
 }
 
-bool MessengerServer::isConnected(string username) {
-	if (_users.find(username) == _users.end())
-		return false; // not found
+bool MessengerServer::isConnected(string userName) {
+	if (_users.find(userName) == _users.end()) { // not found
+		return false;
+	}
+
 	return true;
 }
 
-void MessengerServer::getListRooms(User *client) {
+void MessengerServer::sendListChatRooms(User *client) {
 	client->writeCommand(LIST_CHAT_ROOMS);
 	client->writeCommand(_chatRooms.size());
 
-	this->readfromChatRoom(client);
+	readFromChatRoom(client);
 }
 
-int MessengerServer::getListChatUsers(User *client) {
-	int numOfUsers = 0;
-	string ChatRoomName = client->readMsg();
+void MessengerServer::sendListChatRoomUsers(User *client) {
+	string chatRoomName = client->readMsg();
 	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
-		if (ChatRoomName == iter->first) {
+		if (chatRoomName == iter->first) {
 			client->writeCommand(LIST_CONNECTED_USERS_IN_CHAT_ROOM);
-			(iter)->second->sendUserList(client);
+			iter->second->sendUserList(client);
 			break;
 		}
 	}
-	return numOfUsers;
 }
 
-void MessengerServer::getListUsers(User *client) {
-	int numOfusers = 0;
-	numOfusers = numOfUsersFromFile();
-
+void MessengerServer::sendListUsers(User *client) {
 	client->writeCommand(LIST_USERS);
-	client->writeCommand(numOfusers - 1);
 
-	if (client != NULL)
+	int numOfUsers = numOfUsersFromFile();
+	client->writeCommand(numOfUsers - 1); // TODO: why?
+
+	if (client != NULL) {
 		readFromFile(client);
-	else
+	} else {
 		readFromFile(NULL);
-
+	}
 }
 
-void MessengerServer::exitServer(User* clientName) {
+void MessengerServer::exitServer(User* client) {
 	//clientName->closeSession(true);
 	//clientName->disconnectFromChatRom(false);
 
-	cout << "the User: " << clientName->getusername() << " was  disconnect" << endl;
-	_users.erase(clientName->getusername());
+	cout << "The user: " << client->getusername() << " was disconnect" << endl;
+	_users.erase(client->getusername());
 }
 
 void MessengerServer::createChatRoom(User* creator) {
@@ -312,7 +357,7 @@ void MessengerServer::deleteChatRoom(User* creator) {
 
 }
 
-void MessengerServer::loginChatRoom(User* loginUser) {
+void MessengerServer::enterChatRoom(User* loginUser) {
 	string roomName = loginUser->readMsg();
 	bool exist = false;
 	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
@@ -335,62 +380,5 @@ void MessengerServer::loginChatRoom(User* loginUser) {
 	} else {
 		loginUser->writeCommand(CHAT_ROOM_ENTERING_DENIED);
 		loginUser->writeMsg(string("you are already logged in"));
-	}
-}
-
-int MessengerServer::numOfUsersFromFile() {
-	string line;
-	fstream loginFile;
-	string userFromFile;
-	int counter = 0;
-
-	loginFile.open(_pathToUsersFile.c_str(), ios::in | ios::out | ios::binary);
-
-	while (!loginFile.eof()) {
-		getline(loginFile, line);
-		counter++;
-	}
-	loginFile.close();
-	return counter;
-}
-
-void MessengerServer::readFromFile(User *clientName) {
-	string line;
-	fstream loginFile;
-	string userFromFile;
-	loginFile.open(_pathToUsersFile.c_str(), ios::in | ios::out | ios::binary);
-	if (loginFile.is_open()) {
-		while (!loginFile.eof()) {
-			getline(loginFile, line);
-			istringstream liness(line);
-			getline(liness, userFromFile, '-');
-			if (clientName != NULL) {
-				clientName->writeMsg(userFromFile); // send to client who requested
-			} else {
-				printToSreen(userFromFile); // Print on server
-			}
-
-		}
-		loginFile.close();
-	} else {
-		printToSreen("Error - could not open the file");
-	}
-
-}
-
-void MessengerServer::printToSreen(string msgToScreen) {
-	cout << msgToScreen << endl;
-}
-
-void MessengerServer::readfromChatRoom(User *clientName) {
-	string name;
-	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
-		name = iter->first;
-		if (clientName != NULL) {
-			clientName->writeMsg(name); // send to client who requested
-		} else {
-			printToSreen(name); // Print on server
-		}
-
 	}
 }
