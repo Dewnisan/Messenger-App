@@ -1,8 +1,11 @@
 #include <string>
 
-#include "LoginManager.h"
+#include "TCPSocket.h"
+#include "MessengerServer.h"
 #include "MultipleTCPSocketsListener.h"
 #include "TCPMessengerProtocolExtentions.h"
+
+#include "LoginManager.h"
 
 using namespace std;
 
@@ -95,32 +98,31 @@ void LoginManager::run() {
 		string username;
 		string password;
 
-		int command = readySock->readCommand();
+		int command = MessengerServer::readCommandFromPeer(readySock);
 		switch (command) {
 		case LOGIN_REQUEST:
-			username = readySock->readMsg();
-			password = readySock->readMsg();
+			username = MessengerServer::readDataFromPeer(readySock);
+			password = MessengerServer::readDataFromPeer(readySock);
 			if (login(username, password)) { // Username and password already exist
 				if (_messengerServer->isConnected(username)) { // Already logged in
-					readySock->writeCommand(LOGIN_REQUEST_ALREADY_LOGGED);
+					MessengerServer::sendCommandToPeer(readySock, LOGIN_REQUEST_ALREADY_LOGGED);
 				} else {
 					_messengerServer->addUser(readySock, username);
 					_peers.erase(readySock->destIpAndPort());
-					readySock->writeCommand(LOGIN_REQUEST_APPROVED);
+					MessengerServer::sendCommandToPeer(readySock, LOGIN_REQUEST_APPROVED);
 				}
 			} else { // Wrong details
-
-				readySock->writeCommand(LOGIN_REQUEST_WRONG_DETAILS);
+				MessengerServer::sendCommandToPeer(readySock, LOGIN_REQUEST_WRONG_DETAILS);
 			}
 			break;
 
 		case REGISTRATION_REQUEST:
-			username = readySock->readMsg();
-			password = readySock->readMsg();
+			username = MessengerServer::readDataFromPeer(readySock);
+			password = MessengerServer::readDataFromPeer(readySock);
 			if (signUp(username, password)) {
-				readySock->writeCommand(REGISTRATION_REQUEST_APPROVED);
+				MessengerServer::sendCommandToPeer(readySock, REGISTRATION_REQUEST_APPROVED);
 			} else {
-				readySock->writeCommand(REGISTRATION_REQUEST_DENIED);
+				MessengerServer::sendCommandToPeer(readySock, REGISTRATION_REQUEST_DENIED);
 			}
 			break;
 

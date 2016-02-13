@@ -4,13 +4,14 @@
 #include <map>
 #include <string>
 
+#include "MessengerEntity.h"
 #include "MThread.h"
 #include "TCPSocket.h"
 #include "User.h"
 
 class User;
 
-class MessengerServer: public MThread {
+class MessengerServer: public MThread, public MessengerEntity {
 	bool _running;
 	std::string _pathToUsersFile;
 
@@ -29,7 +30,7 @@ public:
 	void run();
 
 	// add user to users map
-	bool addUser(TCPSocket* userSocket, string LoginUserName);
+	bool addUser(TCPSocket* userSocket, std::string LoginUserName);
 
 	// user exit from the server
 	void exitServer(User* clientName);

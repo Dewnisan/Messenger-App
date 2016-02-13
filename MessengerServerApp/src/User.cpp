@@ -1,3 +1,4 @@
+#include "MessengerServer.h"
 #include "TCPMessengerProtocolExtentions.h"
 #include "User.h"
 
@@ -71,16 +72,19 @@ bool User::closeSession(bool isinitiating) {
 }
 
 int User::readCommand() {
-	return _sock->readCommand();
+	return MessengerServer::readCommandFromPeer(_sock);
 }
+
 string User::readMsg() {
-	return _sock->readMsg();
+	return MessengerServer::readDataFromPeer(_sock);
 }
+
 void User::writeMsg(string msg) {
-	_sock->writeMsg(msg);
+	MessengerServer::sendDataToPeer(_sock, msg);
 }
+
 void User::writeCommand(int command) {
-	_sock->writeCommand(command);
+	MessengerServer::sendCommandToPeer(_sock, command);
 }
 
 string User::getDestandport() {
