@@ -9,21 +9,23 @@
 class User;
 
 class ChatRoom {
-	std::string _chatRoomName;
-	std::vector<User*> charRoomUsers;
-	User* _roomOwner;
-	void updateusers();
+	std::string _name;
+	std::vector<User*> _users;
+	User* _owner;
+
+	void updateUsers();
 
 public:
-	ChatRoom(User* owner, std::string chatroom);
+	ChatRoom(User* owner, std::string name);
 	virtual ~ChatRoom();
 
-	bool  logOffUser(User *usertologof);
-	bool  addUser(User* userToAdd);
 	User* getOwner();
-	int   sendUserList(User *sendto);
-	int  printUsers();
 
+	bool  addUser(User* user);
+	bool  removeUser(User *user);
+
+	int  printUsers();
+	void  sendUserList(User *client);
 };
 
 #endif /* CHATROOM_H_ */

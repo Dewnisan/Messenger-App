@@ -77,7 +77,7 @@ void User::enterToChatRoom(ChatRoom* logToRoom) {
 void User::exitChatRoom(bool fromChatRoom) {
 	if (inChatRoom()) {
 		if (!fromChatRoom) { // TODO: what gives?
-			_chatRoom->logOffUser(this);
+			_chatRoom->removeUser(this);
 		}
 
 		writeCommand(CHAT_ROOM_USER_LEFT);
