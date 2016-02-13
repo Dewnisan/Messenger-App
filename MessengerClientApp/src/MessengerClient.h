@@ -59,7 +59,7 @@ public:
 	}
 };
 
-class MessengerClient: public MThread, MessengerEntity {
+class MessengerClient: public MThread, public MessengerEntity {
 	bool _running;
 	string _username;
 

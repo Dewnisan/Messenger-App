@@ -10,6 +10,8 @@
 #include "MessengerEntity.h"
 #include "TCPSocket.h"
 
+using namespace std;
+
 int MessengerEntity::readCommandFromPeer(TCPSocket* peer) {
 	// read a command from socket
 	int command = 0;
