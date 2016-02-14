@@ -1,9 +1,11 @@
 #include <iostream>
+#include <pthread.h>
 #include <string>
 
-#include "MessengerServer.h"
 #include "MultipleTCPSocketsListener.h"
 #include "TCPMessengerProtocolExtentions.h"
+
+#include "MessengerServer.h"
 
 using namespace std;
 
@@ -169,6 +171,14 @@ void MessengerServer::run() {
 
 MessengerServer::MessengerServer(const std::string& pathToUsersFile) :
 		_running(false), _pathToUsersFile(pathToUsersFile) {
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init(&attr);
+
+	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&_lock, &attr);
+
+	pthread_mutexattr_destroy(&attr);
+
 	start();
 	cout << "Server is up" << endl;
 }
@@ -176,6 +186,7 @@ MessengerServer::MessengerServer(const std::string& pathToUsersFile) :
 MessengerServer::~MessengerServer() {
 	_running = false;
 	waitForThread();
+	pthread_mutex_destroy(&_lock);
 }
 
 void MessengerServer::listUsers() {
@@ -382,4 +393,58 @@ void MessengerServer::enterChatRoom(User* loginUser) {
 		loginUser->writeCommand(CHAT_ROOM_ENTERING_DENIED);
 		loginUser->writeMsg(string("you are already logged in"));
 	}
+}
+
+bool MessengerServer::addUserToFile(string name, string password) {
+	bool retval = false;
+	fstream loginFile;
+
+	pthread_mutex_lock(&_lock);
+
+	if (!isUserExistsInFile(name, password)) {
+		ofstream usersFile;
+		usersFile.open(_pathToUsersFile.c_str(), ios::app);
+
+		if (usersFile.is_open()) {
+			usersFile << name + "-" + password << endl;
+			usersFile.close();
+			retval = true;
+		} else {
+			cout << "Error - could not open file!" << endl;
+		}
+	} else {
+		cout << "User already exists in file" << endl;
+	}
+
+	pthread_mutex_unlock(&_lock);
+
+	return retval;
+}
+
+bool MessengerServer::isUserExistsInFile(string name, string password) {
+	bool retval = false;
+	fstream usersFile;
+
+	pthread_mutex_lock(&_lock);
+
+	usersFile.open(_pathToUsersFile.c_str(), ios::in | ios::out | ios::binary);
+
+	if (usersFile.is_open()) {
+		while (!usersFile.eof()) {
+			string line;
+			getline(usersFile, line);
+
+			if (line == name + "-" + password) {
+				retval = true;
+			}
+		}
+
+		usersFile.close();
+	} else {
+		cout << "Error - could not open file!" << endl;
+	}
+
+	pthread_mutex_unlock(&_lock);
+
+	return retval;
 }

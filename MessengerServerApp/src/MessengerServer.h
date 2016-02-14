@@ -2,6 +2,7 @@
 #define MESSENGERSERVER_H_
 
 #include <map>
+#include <pthread.h>
 #include <string>
 
 #include "MessengerEntity.h"
@@ -11,7 +12,9 @@
 
 class MessengerServer: public MThread, public MessengerEntity {
 	bool _running;
-	std::string _pathToUsersFile; // TODO: add locking to file
+
+	std::string _pathToUsersFile;
+	pthread_mutex_t _lock; // Locking mechanism for users file
 
 	std::map<std::string, User*> _users; // pool of logged in users
 	std::map<std::string, ChatRoom*> _chatRooms;
@@ -82,6 +85,9 @@ public:
 
 	// Enter to chat room
 	void enterChatRoom(User* creator);
+
+	bool addUserToFile(string name, string password);
+	bool isUserExistsInFile(string name, string password);
 };
 
 #endif /* MESSENGERSERVER_H_ */

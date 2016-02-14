@@ -9,59 +9,12 @@
 
 using namespace std;
 
-bool LoginManager::login(string userName, string password) {
-	fstream loginFile;
-	loginFile.open(_loginFile, ios::in | ios::out | ios::binary);
-
-	if (loginFile.is_open()) {
-		while (!loginFile.eof()) {
-			string line;
-			getline(loginFile, line);
-
-			if (line == userName + string("-") + password) {
-				return true;
-			}
-		}
-
-		loginFile.close();
-	} else {
-		cout << "Error - could not open file!" << endl;
-	}
-
-	return false;
+bool LoginManager::login(string name, string password) {
+	return _messengerServer->isUserExistsInFile(name, password);
 }
 
-bool LoginManager::signUp(string userName, string password) {
-	fstream loginFile;
-	loginFile.open(_loginFile, ios::in | ios::out | ios::binary);
-
-	if (!loginFile.is_open()) {
-		cout << "Error - could not open file!" << endl;
-		return false;
-	}
-
-	while (!loginFile.eof()) {
-		string line;
-		getline(loginFile, line);
-
-		string userFromFile;
-		istringstream liness(line);
-		getline(liness, userFromFile, ':');
-
-		if (userFromFile == userName) {
-			loginFile.close();
-			return false;
-		}
-	}
-
-	loginFile.close();
-
-	ofstream loginFile1;
-	loginFile1.open(_loginFile, ios::app);
-	loginFile1 << userName + string("-") + password << endl;
-	loginFile1.close();
-
-	return true;
+bool LoginManager::signUp(string name, string password) {
+	return _messengerServer->addUserToFile(name, password);
 }
 
 LoginManager::LoginManager(MessengerServer* messengerServer) :

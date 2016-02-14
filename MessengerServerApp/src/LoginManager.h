@@ -10,16 +10,15 @@
 
 // Handles the login and registration requests
 class LoginManager: public MThread {
-	const char* _loginFile = "connections.txt";
 	bool _running;
 	std::map<std::string, TCPSocket*> _peers; // peers which didn't log in
 	MessengerServer* _messengerServer;
 
 	// Search in file for the given username and password.
-	bool login(string userName, string password);
+	bool login(string name, string password);
 
 	// Write to file the new user with his details
-	bool signUp(string userName, string password);
+	bool signUp(string name, string password);
 
 public:
 
