@@ -58,12 +58,12 @@ public:
 	void listChatRoomUsers(string chatRoomName);
 
 	// Adds user to users pool
-	bool addUser(TCPSocket* userSocket, std::string userName);
+	bool addUser(std::string userName, TCPSocket* userSocket);
 
 	// Send list of the connected users to the asking client
 	void sendListConnectedUsers(User *client);
 
-	bool isConnected(string userName);
+	bool isLoggedIn(string userName);
 
 	// Send list of chat rooms to the asking client
 	void sendListChatRooms(User *client);

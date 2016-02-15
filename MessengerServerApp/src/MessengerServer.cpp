@@ -247,7 +247,7 @@ void MessengerServer::listChatRoomUsers(string chatRoomName) {
 	}
 }
 
-bool MessengerServer::addUser(TCPSocket* userSocket, string userName) {
+bool MessengerServer::addUser(string userName, TCPSocket* userSocket) {
 	User* userToAdd = new User(userName, userSocket);
 
 	pair<map<string, User*>::iterator, bool> ret = _users.insert(pair<string, User*>(userName, userToAdd));
@@ -271,7 +271,7 @@ void MessengerServer::sendListConnectedUsers(User *client) {
 	}
 }
 
-bool MessengerServer::isConnected(string userName) {
+bool MessengerServer::isLoggedIn(string userName) {
 	if (_users.find(userName) == _users.end()) { // not found
 		return false;
 	}

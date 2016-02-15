@@ -21,13 +21,13 @@ void Listener::run() {
 	_running = true;
 
 	while (_running) {
-		TCPSocket* temp = _clientSocket->listenAndAccept();
-		if (temp == NULL) {
+		TCPSocket* sock = _clientSocket->listenAndAccept();
+		if (sock == NULL) {
 			break;
 		}
 
-		_loginManager->addPeer(temp);
-		cout << "New peer connected: " << temp->destIpAndPort() << endl;
+		_loginManager->addPeer(sock);
+		cout << "New peer connected: " << sock->destIpAndPort() << endl;
 	}
 
 	cout << "Listener has stopped" << endl;

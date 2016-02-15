@@ -9,8 +9,15 @@
 
 using namespace std;
 
-bool LoginManager::login(string name, string password) {
-	return _messengerServer->isUserExistsInFile(name, password);
+bool LoginManager::login(string name, string password, TCPSocket *sock) {
+	if (_messengerServer->isLoggedIn(name)) {
+		return false;
+	}
+
+	if (_messengerServer->isUserExistsInFile(name, password)) {
+		_messengerServer->addUser(name, sock);
+		_pendingPeers.erase(sock->destIpAndPort());
+	}
 }
 
 bool LoginManager::signUp(string name, string password) {
@@ -25,7 +32,7 @@ LoginManager::LoginManager(MessengerServer* messengerServer) :
 LoginManager::~LoginManager() {
 	_running = false;
 
-	for (map<string, TCPSocket*>::iterator iter = _peers.begin(); iter != _peers.end(); iter++) {
+	for (map<string, TCPSocket*>::iterator iter = _pendingPeers.begin(); iter != _pendingPeers.end(); iter++) {
 		iter->second->cclose();
 	}
 
@@ -37,7 +44,7 @@ void LoginManager::run() {
 		MultipleTCPSocketsListener multipleSocketsListener;
 
 		vector<TCPSocket*> sockets;
-		for (map<std::string, TCPSocket*>::iterator iter = _peers.begin(); iter != _peers.end(); iter++) {
+		for (map<std::string, TCPSocket*>::iterator iter = _pendingPeers.begin(); iter != _pendingPeers.end(); iter++) {
 			sockets.push_back(iter->second);
 		}
 
@@ -56,16 +63,14 @@ void LoginManager::run() {
 		case LOGIN_REQUEST:
 			username = MessengerServer::readDataFromPeer(readySock);
 			password = MessengerServer::readDataFromPeer(readySock);
-			if (login(username, password)) { // Username and password already exist
-				if (_messengerServer->isConnected(username)) { // Already logged in
+			if (login(username, password, readySock)) {
+				MessengerServer::sendCommandToPeer(readySock, LOGIN_REQUEST_APPROVED);
+			} else {
+				if (_messengerServer->isLoggedIn(username)) { // Already logged in
 					MessengerServer::sendCommandToPeer(readySock, LOGIN_REQUEST_ALREADY_LOGGED);
 				} else {
-					_messengerServer->addUser(readySock, username);
-					_peers.erase(readySock->destIpAndPort());
-					MessengerServer::sendCommandToPeer(readySock, LOGIN_REQUEST_APPROVED);
+					MessengerServer::sendCommandToPeer(readySock, LOGIN_REQUEST_WRONG_DETAILS);
 				}
-			} else { // Wrong details
-				MessengerServer::sendCommandToPeer(readySock, LOGIN_REQUEST_WRONG_DETAILS);
 			}
 			break;
 
@@ -80,7 +85,7 @@ void LoginManager::run() {
 			break;
 
 		case EXIT:
-			_peers.erase(readySock->destIpAndPort());
+			_pendingPeers.erase(readySock->destIpAndPort());
 			cout << "Peer disconnected: " + readySock->destIpAndPort() << endl;
 			break;
 		}
@@ -88,6 +93,6 @@ void LoginManager::run() {
 }
 
 void LoginManager::addPeer(TCPSocket* peer) {
-	_peers[peer->destIpAndPort()] = peer;
+	_pendingPeers[peer->destIpAndPort()] = peer;
 }
 
