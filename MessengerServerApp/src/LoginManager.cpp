@@ -10,14 +10,14 @@
 using namespace std;
 
 bool LoginManager::login(string name, string password, TCPSocket *sock) {
-	if (_messengerServer->isLoggedIn(name)) {
+	if (_messengerServer->isLoggedIn(name) || !_messengerServer->isUserExistsInFile(name, password)) {
 		return false;
 	}
 
-	if (_messengerServer->isUserExistsInFile(name, password)) {
-		_messengerServer->addUser(name, sock);
-		_pendingPeers.erase(sock->destIpAndPort());
-	}
+	_messengerServer->addUser(name, sock);
+	_pendingPeers.erase(sock->destIpAndPort());
+
+	return true;
 }
 
 bool LoginManager::signUp(string name, string password) {
@@ -92,7 +92,7 @@ void LoginManager::run() {
 	}
 }
 
-void LoginManager::addPeer(TCPSocket* peer) {
+void LoginManager::addPendingPeer(TCPSocket* peer) {
 	_pendingPeers[peer->destIpAndPort()] = peer;
 }
 

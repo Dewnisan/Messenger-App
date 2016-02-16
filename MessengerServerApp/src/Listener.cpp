@@ -26,7 +26,7 @@ void Listener::run() {
 			break;
 		}
 
-		_loginManager->addPeer(sock);
+		_loginManager->addPendingPeer(sock);
 		cout << "New peer connected: " << sock->destIpAndPort() << endl;
 	}
 

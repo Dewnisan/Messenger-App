@@ -14,7 +14,7 @@ class LoginManager: public MThread {
 	std::map<std::string, TCPSocket*> _pendingPeers; // peers which didn't log in
 	MessengerServer* _messengerServer;
 
-	// Search in file for the given username and password and adds users to logged in pool.
+	// Search in file for the given username and password and adds users to logged-in pool.
 	bool login(string name, string password, TCPSocket *sock);
 
 	// Write to file the new user with his details
@@ -26,7 +26,7 @@ public:
 	virtual ~LoginManager();
 
 	void run();
-	void addPeer(TCPSocket* peer);
+	void addPendingPeer(TCPSocket* peer);
 };
 
 #endif /* LOGINMANAGER_H_ */

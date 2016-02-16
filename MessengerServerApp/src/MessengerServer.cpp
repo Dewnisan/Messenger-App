@@ -31,7 +31,7 @@ int MessengerServer::numOfUsersFromFile() {
 
 void MessengerServer::readFromFile(User *clientName) {
 	fstream loginFile;
-	loginFile.open(_pathToUsersFile.c_str(), ios::in | ios::out | ios::binary);
+	loginFile.open(_pathToUsersFile.c_str(), ios::in | ios::out);
 
 	if (loginFile.is_open()) {
 		while (!loginFile.eof()) {
@@ -125,11 +125,11 @@ void MessengerServer::run() {
 			msg = currUser->readMsg(); // the partner name
 			if (!_users[msg]) {
 				currUser->writeCommand(SESSION_CREATE_REFUSED);
-				currUser->writeMsg(string("there is no such user"));
+				currUser->writeMsg("there is no such user");
 				break;
 			} else if (_users[msg]->isConversing()) {
 				currUser->writeCommand(SESSION_CREATE_REFUSED);
-				currUser->writeMsg(string("the wanted user is in chat"));
+				currUser->writeMsg("the wanted user is in chat");
 				break;
 			}
 			createSession(currUser, _users[msg]);
@@ -190,13 +190,12 @@ MessengerServer::~MessengerServer() {
 }
 
 void MessengerServer::listUsers() {
-	cout << "Users:" << endl;
 	readFromFile(NULL); // To server
 }
 
 void MessengerServer::listConnectedUsers() {
 	if (_users.empty()) {
-		cout << "There aren't any users connected" << endl;
+		cout << "There are no users connected" << endl;
 		return;
 	}
 
@@ -208,33 +207,36 @@ void MessengerServer::listConnectedUsers() {
 }
 
 void MessengerServer::listSessions() {
-	cout << "Connected users that in session:" << endl;
+	bool found = false;
 
 	for (map<string, User*>::iterator iter = _users.begin(); iter != _users.end(); iter++) {
 		if (iter->second->inSession()) {
+			found = true;
 			string name = iter->first;
 			printToScreen(name);
 		}
+	}
+
+	if (!found) {
+		cout << "There are no open sessions" << endl;
 	}
 }
 
 void MessengerServer::listChatRooms() {
 	if (_chatRooms.empty()) {
-		cout << "There are no chat rooms yet" << endl;
+		cout << "There are no chat rooms" << endl;
 		return;
 	}
 
-	cout << "Chat rooms:" << endl;
 	readFromChatRoom(NULL);
 }
 
 void MessengerServer::listChatRoomUsers(string chatRoomName) {
 	if (_chatRooms.find(chatRoomName) == _chatRooms.end()) {
-		cout << "No such chat room: " << chatRoomName << endl;
+		cout << "There is no such chat room: " << chatRoomName << endl;
 		return;
 	}
 
-	cout << "Users in chat room:" << endl;
 	int numOfUsers = 0;
 	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
 		if (chatRoomName == iter->first) {
