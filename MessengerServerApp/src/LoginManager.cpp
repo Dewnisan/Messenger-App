@@ -10,7 +10,8 @@
 using namespace std;
 
 bool LoginManager::login(string name, string password, TCPSocket *sock) {
-	if (_messengerServer->isLoggedIn(name) || !_messengerServer->isUserExistsInFile(name, password)) {
+	if (_messengerServer->isLoggedIn(name) ||
+			!_messengerServer->isLoginInfoExistsInFile(name, password)) {
 		return false;
 	}
 
@@ -40,6 +41,8 @@ LoginManager::~LoginManager() {
 }
 
 void LoginManager::run() {
+	_running = true;
+
 	while (_running) {
 		MultipleTCPSocketsListener multipleSocketsListener;
 

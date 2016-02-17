@@ -85,6 +85,8 @@ void MessengerServer::createSession(User* fromUser, User* toUser) {
 	fromUser->writeMsg(toUser->getIp());
 	fromUser->writeCommand(toUser->getPort());
 	fromUser->writeCommand(fromUser->getPort());
+
+	cout << "Session was created between " << fromUser->getName() << " and " << toUser->getName() << endl;
 }
 
 void MessengerServer::run() {
@@ -123,17 +125,17 @@ void MessengerServer::run() {
 		switch (command) {
 		case SESSION_CREATE:
 			msg = currUser->readMsg(); // the partner name
-			if (!_users[msg]) {
+			if (_users.find(msg) == _users.end()) {
 				currUser->writeCommand(SESSION_CREATE_REFUSED);
-				currUser->writeMsg("there is no such user");
+				currUser->writeMsg("the requested user is disconnected");
 				break;
 			} else if (_users[msg]->isConversing()) {
 				currUser->writeCommand(SESSION_CREATE_REFUSED);
-				currUser->writeMsg("the wanted user is in chat");
+				currUser->writeMsg("the requested user is in chat");
 				break;
 			}
+
 			createSession(currUser, _users[msg]);
-			cout << "Session was created between: " << currUser->getName() << " AND " << msg << endl;
 			break;
 		case EXIT:
 			exitServer(currUser);
@@ -147,7 +149,7 @@ void MessengerServer::run() {
 		case CHAT_ROOM_CLOSE:
 			deleteChatRoom(currUser);
 			break;
-		case CHAT_ROOM_LOGIN:
+		case CHAT_ROOM_ENTER:
 			enterChatRoom(currUser);
 			break;
 		case CHAT_ROOM_EXIT:
@@ -233,7 +235,7 @@ void MessengerServer::listChatRooms() {
 
 void MessengerServer::listChatRoomUsers(string chatRoomName) {
 	if (_chatRooms.find(chatRoomName) == _chatRooms.end()) {
-		cout << "There is no such chat room: " << chatRoomName << endl;
+		cout << "Chat room does not exist" << endl;
 		return;
 	}
 
@@ -290,12 +292,13 @@ void MessengerServer::sendListChatRooms(User *client) {
 
 void MessengerServer::sendListChatRoomUsers(User *client) {
 	string chatRoomName = client->readMsg();
-	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
-		if (chatRoomName == iter->first) {
-			client->writeCommand(LIST_CONNECTED_USERS_IN_CHAT_ROOM);
-			iter->second->sendUserList(client);
-			break;
-		}
+	map<string, ChatRoom*>::iterator iter = _chatRooms.find(chatRoomName);
+
+	if (iter != _chatRooms.end()) {
+		client->writeCommand(LIST_CONNECTED_USERS_IN_CHAT_ROOM);
+		iter->second->sendUserList(client);
+	} else {
+		client->writeCommand(CHAT_ROOM_NOT_EXIST);
 	}
 }
 
@@ -403,7 +406,7 @@ bool MessengerServer::addUserToFile(string name, string password) {
 
 	pthread_mutex_lock(&_lock);
 
-	if (!isUserExistsInFile(name, password)) {
+	if (!isUserExistsInFile(name)) {
 		ofstream usersFile;
 		usersFile.open(_pathToUsersFile.c_str(), ios::app);
 
@@ -423,13 +426,44 @@ bool MessengerServer::addUserToFile(string name, string password) {
 	return retval;
 }
 
-bool MessengerServer::isUserExistsInFile(string name, string password) {
+bool MessengerServer::isUserExistsInFile(string name) {
 	bool retval = false;
 	fstream usersFile;
 
 	pthread_mutex_lock(&_lock);
 
-	usersFile.open(_pathToUsersFile.c_str(), ios::in | ios::out | ios::binary);
+	usersFile.open(_pathToUsersFile.c_str(), ios::in | ios::out);
+
+	if (usersFile.is_open()) {
+		while (!usersFile.eof()) {
+			string line;
+			getline(usersFile, line);
+
+			string delimiter("-");
+			string::size_type delimiterIndex = line.find(delimiter);
+			string nameFromFile = line.substr(0, delimiterIndex);
+			if (nameFromFile == name) {
+				retval = true;
+			}
+		}
+
+		usersFile.close();
+	} else {
+		cout << "Error - could not open file!" << endl;
+	}
+
+	pthread_mutex_unlock(&_lock);
+
+	return retval;
+}
+
+bool MessengerServer::isLoginInfoExistsInFile(string name, string password) {
+	bool retval = false;
+	fstream usersFile;
+
+	pthread_mutex_lock(&_lock);
+
+	usersFile.open(_pathToUsersFile.c_str(), ios::in | ios::out);
 
 	if (usersFile.is_open()) {
 		while (!usersFile.eof()) {
@@ -437,7 +471,7 @@ bool MessengerServer::isUserExistsInFile(string name, string password) {
 			getline(usersFile, line);
 
 			if (line == name + "-" + password) {
-				retval = true;
+				return true;
 			}
 		}
 

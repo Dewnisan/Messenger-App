@@ -8,7 +8,6 @@ using namespace std;
 Listener::Listener(LoginManager* loginManager) :
 		 _running(false), _loginManager(loginManager), _clientSocket(new TCPSocket(MSNGR_PORT)) {
 	start();
-	cout << "Listener is up!" << endl;
 }
 
 Listener::~Listener() {

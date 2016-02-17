@@ -87,7 +87,9 @@ public:
 	void enterChatRoom(User* creator);
 
 	bool addUserToFile(string name, string password);
-	bool isUserExistsInFile(string name, string password);
+	bool isUserExistsInFile(string name);
+
+	bool isLoginInfoExistsInFile(string name, string password);
 };
 
 #endif /* MESSENGERSERVER_H_ */
