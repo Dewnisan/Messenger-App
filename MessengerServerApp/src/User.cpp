@@ -69,14 +69,14 @@ bool User::closeSession(bool isInitiating) {
 	return true;
 }
 
-void User::enterToChatRoom(ChatRoom* logToRoom) {
+void User::enterToChatRoom(ChatRoom* name) {
 	_inChatRoom = true;
-	_chatRoom = logToRoom;
+	_chatRoom = name;
 }
 
 void User::exitChatRoom(bool fromChatRoom) {
 	if (inChatRoom()) {
-		if (!fromChatRoom) { // TODO: what gives?
+		if (!fromChatRoom) {
 			_chatRoom->removeUser(this);
 		}
 

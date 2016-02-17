@@ -368,8 +368,8 @@ void MessengerServer::deleteChatRoom(User* creator) {
 
 }
 
-void MessengerServer::enterChatRoom(User* loginUser) {
-	string roomName = loginUser->readMsg();
+void MessengerServer::enterChatRoom(User* user) {
+	string roomName = user->readMsg();
 	bool exist = false;
 	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
 		if (iter->first == roomName) {
@@ -378,19 +378,18 @@ void MessengerServer::enterChatRoom(User* loginUser) {
 	}
 
 	if (!exist) {
-		loginUser->writeCommand(CHAT_ROOM_ENTERING_DENIED);
-		loginUser->writeMsg(string("Room does not exist"));
+		user->writeCommand(CHAT_ROOM_ENTERING_DENIED);
+		user->writeMsg(string("Room does not exist"));
 		return;
 	}
 
-	loginUser->enterToChatRoom(_chatRooms[roomName]);
-	if (_chatRooms[roomName]->addUser(loginUser)) // addUser of ChatRoom
-			{
-		loginUser->writeCommand(CHAT_ROOM_USER_ENTERED);
-		loginUser->writeCommand(loginUser->getPort());
+	user->enterToChatRoom(_chatRooms[roomName]);
+	if (_chatRooms[roomName]->addUser(user)) {
+		user->writeCommand(CHAT_ROOM_USER_ENTERED);
+		user->writeCommand(user->getPort());
 	} else {
-		loginUser->writeCommand(CHAT_ROOM_ENTERING_DENIED);
-		loginUser->writeMsg(string("you are already logged in"));
+		user->writeCommand(CHAT_ROOM_ENTERING_DENIED);
+		user->writeMsg(string("You are already in the chat room"));
 	}
 }
 

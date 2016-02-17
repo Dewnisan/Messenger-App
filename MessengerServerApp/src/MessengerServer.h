@@ -84,7 +84,7 @@ public:
 	void deleteChatRoom(User* creator);
 
 	// Enter to chat room
-	void enterChatRoom(User* creator);
+	void enterChatRoom(User* user);
 
 	bool addUserToFile(string name, string password);
 	bool isUserExistsInFile(string name);
