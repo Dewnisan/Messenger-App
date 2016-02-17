@@ -1,4 +1,6 @@
-
+/**
+ * Handles all of the incoming and outgoing messages of a single remote client.
+ */
 #ifndef CLIENTLINKER_H_
 #define CLIENTLINKER_H_
 
@@ -19,7 +21,7 @@ public:
 
 	/**
 	 * This method runs in a separate thread, it reads the incoming messages
-	 * from the socket. The thread should exist when the socket is closed.
+	 * from the socket. The thread should exit when the socket is closed.
 	 */
 	void run();
 };

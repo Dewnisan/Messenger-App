@@ -55,7 +55,7 @@ void MessengerClient::run() {
 			break;
 		case CHAT_ROOM_USER_LEFT:
 			chatRoomLeft();
-			cout << "Your user left the chat room" << endl;
+			cout << "You left the chat room" << endl;
 			break;
 		case CHAT_ROOM_USER_ENTERED:
 			partnerPort = MessengerClient::readCommandFromPeer(_serverSocket); // UDP listen port
