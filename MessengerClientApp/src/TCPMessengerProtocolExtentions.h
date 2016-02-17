@@ -9,7 +9,7 @@
 #define SESSION_CLOSED						10
 #define CHAT_ROOM_CREATE					11
 #define CHAT_ROOM_CLOSE						12
-#define CHAT_ROOM_LOGIN						13
+#define CHAT_ROOM_ENTER						13
 #define CHAT_ROOM_EXIT						14
 
 #define LIST_CONNECTED_USERS				15
@@ -28,6 +28,7 @@
 #define CHAT_ROOM_USER_LEFT					26
 #define CHAT_ROOM_UPDATED					27
 #define CHAT_ROOM_UNCLOSED					28
+#define CHAT_ROOM_NOT_EXIST					29
 
 #define LOGIN_REQUEST						30
 #define REGISTRATION_REQUEST				31

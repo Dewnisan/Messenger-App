@@ -142,7 +142,7 @@ public:
 	bool sendMessage(string msg);
 
 	// Disconnects the open session OR exit from a chat room
-	bool closeSessionOrExitRoom();
+	bool closeSessionOrExitChatRoom();
 
 	// Prints the current status of the client
 	void printCurrentInfo();

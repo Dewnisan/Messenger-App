@@ -17,7 +17,6 @@ int MessengerEntity::readCommandFromPeer(TCPSocket* peer) {
 	int command = 0;
 	int byteCount = peer->recv((char*)&command, 4);
 	if (byteCount < 4) {
-		cout << "Error while reading command from peer" << endl;
 		return byteCount;
 	}
 

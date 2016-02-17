@@ -39,11 +39,7 @@ int main() {
 		cin >> command;
 		if (command == "c") {
 			cin >> parameter1; // Server IP
-			if (clientManager.connectToServer(parameter1, MSNGR_PORT)) {
-				cout << "Connected to: " << parameter1 << endl;
-			} else {
-				cout << "Connection failed - already connected" << endl;
-			}
+			clientManager.connectToServer(parameter1, MSNGR_PORT);
 		} else if (command == "login") {
 			cin >> parameter1; // Username
 			cin >> parameter2; // Password
@@ -58,19 +54,13 @@ int main() {
 			clientManager.listConnectedUsers();
 		} else if (command == "cr") {
 			cin >> parameter1; // Room name
-			if (!clientManager.createChatRoom(parameter1)) {
-				cout << "Cannot create room in current status, check if you are logged in" << endl;
-			}
+			clientManager.createChatRoom(parameter1);
 		} else if (command == "or") {
 			cin >> parameter1; // Room name
-			if (!clientManager.enterChatRoom(parameter1)) {
-				cout << "Cannot enter to the room, check if you are already logged in" << endl;
-			}
+			clientManager.enterChatRoom(parameter1);
 		} else if (command == "dr") {
 			cin >> parameter1; // Room name
-			if (!clientManager.deleteChatRoom(parameter1)) {
-				cout << "Cannot delete specified room" << endl;
-			}
+			clientManager.deleteChatRoom(parameter1);
 		} else if (command == "lr") {
 			clientManager.listRooms();
 		} else if (command == "lru") {
@@ -83,9 +73,7 @@ int main() {
 			getline(std::cin, parameter1); // Message to send with UDP
 			clientManager.sendMessage(parameter1);
 		} else if (command == "cs") {
-			if (!clientManager.closeSessionOrExitRoom()) {
-				cout << "There is not session or room to exit from" << endl;
-			}
+			clientManager.closeSessionOrExitChatRoom();
 		} else if (command == "l") {
 			clientManager.printCurrentInfo();
 		} else if (command == "d") {

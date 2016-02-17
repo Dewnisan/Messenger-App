@@ -76,6 +76,9 @@ void MessengerClient::run() {
 		case CHAT_ROOM_UNCLOSED:
 			cout << "You cannot delete the chat room" << endl;
 			break;
+		case CHAT_ROOM_NOT_EXIST:
+			cout << "Chat room does not exist" << endl;
+			break;
 		case LIST_CONNECTED_USERS:
 			printConnectedUsers();
 			break;
@@ -188,11 +191,14 @@ MessengerClient::~MessengerClient() {
 
 bool MessengerClient::connectToServer(string ip, int port) {
 	if (_serverSocket != NULL) {
+		cout << "Connection failed - already connected" << endl;
 		return false;
 	}
 
 	_serverSocket = new TCPSocket(ip, port);
 	_connected = true;
+
+	cout << "Connected to: " << ip << endl;
 
 	return true;
 }
@@ -210,9 +216,9 @@ void MessengerClient::signup(string username, string password) {
 
 		int response = MessengerClient::readCommandFromPeer(_serverSocket);
 		if (response == REGISTRATION_REQUEST_APPROVED) {
-			cout << "Signed up was successful with the user: " << username << endl;
+			cout << "Successfully registered the user: " << username << endl;
 		} else if (response == REGISTRATION_REQUEST_DENIED) {
-			cout << "You have failed to sign up" << endl;
+			cout << "Registration failed" << endl;
 		}
 	} else {
 		cout << "Not connected to server" << endl;
@@ -288,10 +294,10 @@ bool MessengerClient::enterChatRoom(string roomName) {
 	}
 
 	if (isConversing()) {
-		closeSessionOrExitRoom();
+		closeSessionOrExitChatRoom();
 	}
 
-	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_LOGIN);
+	MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_ENTER);
 	MessengerClient::sendDataToPeer(_serverSocket, roomName);
 
 	return true;
@@ -340,7 +346,7 @@ bool MessengerClient::openSession(string peerName) {
 	}
 
 	if (isConversing()) {
-		closeSessionOrExitRoom();
+		closeSessionOrExitChatRoom();
 	}
 
 	MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CREATE);
@@ -367,14 +373,17 @@ bool MessengerClient::sendMessage(string msg) {
 	return false;
 }
 
-bool MessengerClient::closeSessionOrExitRoom() {
+bool MessengerClient::closeSessionOrExitChatRoom() {
 	if (_inChatRoom) {
 		MessengerClient::sendCommandToPeer(_serverSocket, CHAT_ROOM_EXIT);
 		_inChatRoom = false;
+		cout << "Exited from chat room " + _chatRoomName << endl;
 	} else if (_inSession) {
 		MessengerClient::sendCommandToPeer(_serverSocket, SESSION_CLOSE);
 		_inSession = false;
+		cout << "Closed session with " + _sessionPeer.getName() << endl;
 	} else {
+		cout << "There is not session or room to exit from" << endl;
 		return false;
 	}
 
@@ -408,7 +417,7 @@ void MessengerClient::printCurrentInfo() {
 }
 
 void MessengerClient::disconnectFromServer() {
-	closeSessionOrExitRoom();
+	closeSessionOrExitChatRoom();
 
 	MessengerClient::sendCommandToPeer(_serverSocket, EXIT);
 
