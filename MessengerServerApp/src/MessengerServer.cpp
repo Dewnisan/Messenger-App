@@ -13,15 +13,18 @@ void MessengerServer::printToScreen(string msgToScreen) {
 	cout << msgToScreen << endl;
 }
 
-int MessengerServer::numOfUsersFromFile() {
+int MessengerServer::getNumOfUsersFromFile() {
 	fstream loginFile;
-	loginFile.open(_pathToUsersFile.c_str(), ios::in | ios::out | ios::binary);
+	loginFile.open(_pathToUsersFile.c_str(), ios::in | ios::out);
 
 	int counter = 0;
 	while (!loginFile.eof()) {
 		string line;
 		getline(loginFile, line);
-		counter++;
+
+		if (line != "") {
+			counter++;
+		}
 	}
 
 	loginFile.close();
@@ -305,21 +308,12 @@ void MessengerServer::sendListChatRoomUsers(User *client) {
 void MessengerServer::sendListUsers(User *client) {
 	client->writeCommand(LIST_USERS);
 
-	int numOfUsers = numOfUsersFromFile();
-	client->writeCommand(numOfUsers - 1); // TODO: why?
-
-	if (client != NULL) {
-		readFromFile(client);
-	} else {
-		readFromFile(NULL);
-	}
+	int numOfUsers = getNumOfUsersFromFile();
+	client->writeCommand(numOfUsers);
+	readFromFile(client);
 }
 
 void MessengerServer::exitServer(User* client) {
-	// TODO: what about these?
-//	client->closeSession(true);
-//	client->disconnectFromChatRom(false);
-
 	cout << "The user " << client->getName() << " was disconnected" << endl;
 	_users.erase(client->getName());
 }

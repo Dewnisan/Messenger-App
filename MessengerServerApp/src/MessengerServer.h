@@ -23,7 +23,7 @@ class MessengerServer: public MThread, public MessengerEntity {
 	void printToScreen(string msgToScreen);
 
 	// Returns the number of registered users
-	int numOfUsersFromFile();
+	int getNumOfUsersFromFile();
 
 	// Prints/sends the names of all the users that are registered
 	void readFromFile(User *clientName);
