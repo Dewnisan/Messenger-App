@@ -140,7 +140,7 @@ void MessengerClient::printListUsers() {
 	int numOfUsers = MessengerClient::readCommandFromPeer(_serverSocket);
 	if (numOfUsers > 0) {
 		for (int i = 0; i < numOfUsers; i++) {
-			cout << " user: " << MessengerClient::readDataFromPeer(_serverSocket) << endl;
+			cout << MessengerClient::readDataFromPeer(_serverSocket) << endl;
 		}
 	} else {
 		cout << "No one is connected yet" << endl;
@@ -151,7 +151,7 @@ void MessengerClient::printConnectedUsers() {
 	int numOfUsers = MessengerClient::readCommandFromPeer(_serverSocket);
 	if (numOfUsers > 0) {
 		for (int i = 0; i < numOfUsers; i++) {
-			cout << "User: " << MessengerClient::readDataFromPeer(_serverSocket) << endl;
+			cout << MessengerClient::readDataFromPeer(_serverSocket) << endl;
 		}
 	} else {
 		cout << "No one is connected yet" << endl;
@@ -161,9 +161,8 @@ void MessengerClient::printConnectedUsers() {
 void MessengerClient::printRoomsList() {
 	int numOfRooms = MessengerClient::readCommandFromPeer(_serverSocket);
 	if (numOfRooms > 0) {
-		cout << "Rooms: " << endl;
 		for (int i = 0; i < numOfRooms; i++) {
-			cout << "Room name: " << MessengerClient::readDataFromPeer(_serverSocket) << endl;
+			cout << MessengerClient::readDataFromPeer(_serverSocket) << endl;
 		}
 	} else {
 		cout << "There are no chat rooms yet" << endl;
@@ -247,7 +246,7 @@ void MessengerClient::login(string username, string password) {
 		} else if (response == LOGIN_REQUEST_WRONG_DETAILS) {
 			cout << "Wrong user name or password" << endl;
 		} else if (response == LOGIN_REQUEST_ALREADY_LOGGED) {
-			cout << username + " already logged in" << endl;
+			cout << username + " is already logged in" << endl;
 		}
 	} else {
 		cout << "Not connected to server" << endl;
