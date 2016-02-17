@@ -320,7 +320,7 @@ void MessengerServer::exitServer(User* client) {
 //	client->closeSession(true);
 //	client->disconnectFromChatRom(false);
 
-	cout << "The user: " << client->getName() << " was disconnected" << endl;
+	cout << "The user " << client->getName() << " was disconnected" << endl;
 	_users.erase(client->getName());
 }
 
@@ -345,7 +345,7 @@ void MessengerServer::createChatRoom(User* creator) {
 	//Add new chat room
 	_chatRooms[msg] = new ChatRoom(creator, msg);
 	creator->writeCommand(CHAT_ROOM_CREATED);
-	cout << "Room : " << msg << " was created" << endl;
+	cout << "Room " << msg << " was created successfully" << endl;
 }
 
 void MessengerServer::deleteChatRoom(User* creator) {
