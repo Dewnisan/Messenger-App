@@ -369,14 +369,8 @@ void MessengerServer::deleteChatRoom(User* creator) {
 
 void MessengerServer::enterChatRoom(User* user) {
 	string roomName = user->readMsg();
-	bool exist = false;
-	for (map<string, ChatRoom*>::iterator iter = _chatRooms.begin(); iter != _chatRooms.end(); iter++) {
-		if (iter->first == roomName) {
-			exist = true;
-		}
-	}
 
-	if (!exist) {
+	if (_chatRooms.find(roomName) == _chatRooms.end()) {
 		user->writeCommand(CHAT_ROOM_ENTERING_DENIED);
 		user->writeMsg(string("Room does not exist"));
 		return;
