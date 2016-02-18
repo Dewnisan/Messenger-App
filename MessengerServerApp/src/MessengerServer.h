@@ -16,7 +16,7 @@ class MessengerServer: public MThread, public MessengerEntity {
 	std::string _pathToUsersFile;
 	pthread_mutex_t _lock; // Locking mechanism for users file
 
-	std::map<std::string, User*> _users; // pool of logged in users
+	std::map<std::string, User*> _users; // Pool of logged in users
 	std::map<std::string, ChatRoom*> _chatRooms;
 
 

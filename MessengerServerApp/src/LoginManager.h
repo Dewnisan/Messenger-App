@@ -14,13 +14,16 @@
 
 class LoginManager: public MThread {
 	bool _running;
-	std::map<std::string, TCPSocket*> _pendingPeers; // peers which didn't log in
+	std::map<std::string, TCPSocket*> _pendingPeers; // peers which havn't logged in yet
 	MessengerServer* _messengerServer;
 
-	// Search in file for the given username and password and adds users to logged-in pool.
+	/**
+	 * Searches in users file for the given username and password and adds users
+	 * to logged-in pool in the server.
+	 */
 	bool login(string name, string password, TCPSocket *sock);
 
-	// Write to file the new user with his details
+	// Writes to users file the new user with his details
 	bool signUp(string name, string password);
 
 public:
@@ -29,6 +32,11 @@ public:
 	virtual ~LoginManager();
 
 	void run();
+
+	/**
+	 * Adds a client who connected to the server to the pool of clients who
+	 * havn't logged in yet
+	 */
 	void addPendingPeer(TCPSocket* peer);
 };
 

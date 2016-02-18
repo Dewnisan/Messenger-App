@@ -98,13 +98,12 @@ void MessengerServer::run() {
 	while (_running) {
 		MultipleTCPSocketsListener multipleSocketsListener;
 
-		// Convert User to socket before adding to list
+		// Convert User to socket before adding to pool
 		vector<TCPSocket*> sockets;
 		for (map<string, User*>::iterator iter = _users.begin(); iter != _users.end(); iter++) {
 			sockets.push_back(iter->second->getSocket());
 		}
 
-		// Add sockets
 		multipleSocketsListener.addSockets(sockets);
 
 		// Listen to sockets

@@ -1,6 +1,10 @@
 #ifndef CHATROOM_H_
 #define CHATROOM_H_
 
+/**
+ * Represents a chat room which users may enter to.
+ */
+
 #include <string>
 #include <vector>
 

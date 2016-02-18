@@ -1,8 +1,7 @@
 /*
  * Listener.h
  *
- *  Created on: Feb 6, 2016
- *      Author: user
+ * Listens and accepts incoming connections to the server.
  */
 
 #ifndef LISTENER_H_
@@ -14,7 +13,7 @@
 class Listener: public MThread {
 	bool _running;
 	LoginManager* _loginManager;
-	TCPSocket* _clientSocket;
+	TCPSocket* _listenSock;
 
 public:
 

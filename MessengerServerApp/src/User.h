@@ -1,6 +1,10 @@
 #ifndef USER_H_
 #define USER_H_
 
+/**
+ * Represents a user who is logged into the server.
+ */
+
 #include <fstream>
 #include <iostream>
 #include <stdio.h>
