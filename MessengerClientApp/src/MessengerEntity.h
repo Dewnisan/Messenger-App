@@ -1,8 +1,8 @@
 /*
  * MessengerEntity.h
  *
- *  Created on: Feb 9, 2016
- *      Author: user
+ * Provides basic I/O functions for client-server communication using control and
+ * data channels.
  */
 
 #ifndef MESSENGERENTITY_H_

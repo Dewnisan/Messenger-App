@@ -3,8 +3,6 @@
 #include "TCPMessengerProtocolExtentions.h"
 
 void MessengerClient::run() {
-	string parameter1;
-
 	_running = true;
 	while (_running) {
 		int command = MessengerClient::readCommandFromPeer(_serverSocket);
@@ -12,6 +10,7 @@ void MessengerClient::run() {
 			continue;
 		}
 
+		string parameter1;
 		string name;
 		string ip;
 		int port;

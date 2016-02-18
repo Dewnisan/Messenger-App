@@ -11,6 +11,9 @@
 #include "TCPMessengerProtocol.h"
 #include "TCPSocket.h"
 
+/**
+ * Represents a remote peer in client-to-client communication.
+ */
 class Peer {
 	std::string _name;
 	std::string _ip;
@@ -65,7 +68,7 @@ class MessengerClient: public MThread, public MessengerEntity {
 
 	TCPSocket* _serverSocket;
 
-	Peer _sessionPeer; // Used when opening a session with one user
+	Peer _sessionPeer; // Used when opening a session with one client
 
 	vector<Peer*> _chatUsers; // Used when entering a chat room
 	string _chatRoomName;

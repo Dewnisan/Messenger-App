@@ -1,5 +1,5 @@
 /**
- * Handles all of the incoming and outgoing messages of a single remote client.
+ * Links between a pair of client in the matter of incoming and outgoing messages.
  */
 #ifndef CLIENTLINKER_H_
 #define CLIENTLINKER_H_
