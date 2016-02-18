@@ -20,14 +20,14 @@ void MessengerClient::run() {
 		case SESSION_ESTABLISHED:
 			name = MessengerClient::readDataFromPeer(_serverSocket);
 			ip = MessengerClient::readDataFromPeer(_serverSocket);
-			port = MessengerClient::readCommandFromPeer(_serverSocket);
+			partnerPort = MessengerClient::readCommandFromPeer(_serverSocket);
 
 			_sessionPeer.setName(name);
 			_sessionPeer.setIp(ip);
-			_sessionPeer.setPort(port);
+			_sessionPeer.setPort(partnerPort);
 
-			partnerPort = MessengerClient::readCommandFromPeer(_serverSocket);
-			_clientLinker = new ClientLinker(partnerPort);
+			port = MessengerClient::readCommandFromPeer(_serverSocket);
+			_clientLinker = new ClientLinker(port);
 			_inSession = true;
 
 			cout << "You are in direct connection with  " << _sessionPeer.getName() << endl;
@@ -57,8 +57,8 @@ void MessengerClient::run() {
 			cout << "You left the chat room" << endl;
 			break;
 		case CHAT_ROOM_USER_ENTERED:
-			partnerPort = MessengerClient::readCommandFromPeer(_serverSocket); // UDP listen port
-			_clientLinker = new ClientLinker(partnerPort);
+			port = MessengerClient::readCommandFromPeer(_serverSocket); // UDP listen port
+			_clientLinker = new ClientLinker(port);
 			_inChatRoom = true;
 
 			cout << "You have joined to the room" << endl;
