@@ -1,3 +1,7 @@
+/**
+ * Handles the login and registration requests
+ */
+
 #ifndef LOGINMANAGER_H_
 #define LOGINMANAGER_H_
 
@@ -8,7 +12,6 @@
 #include "MThread.h"
 #include "TCPSocket.h"
 
-// Handles the login and registration requests
 class LoginManager: public MThread {
 	bool _running;
 	std::map<std::string, TCPSocket*> _pendingPeers; // peers which didn't log in

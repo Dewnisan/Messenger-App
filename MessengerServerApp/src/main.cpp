@@ -23,9 +23,9 @@ int main() {
 	cout << "Welcome to messenger server" << endl;
 	printInstructions();
 
-	MessengerServer messengerServer("connections.txt"); // Listens to all of the users which have been connected
-	LoginManager loginManager(&messengerServer); // Handles the requests of all peer in the peer pool (non-users)
-	Listener listener(&loginManager); // Listen to all of the new connections and adds the peers to the peer pool
+	MessengerServer messengerServer("connections.txt"); // Listens to all of the users which have been logged in
+	LoginManager loginManager(&messengerServer); // Handles the requests (login and registration) of all of the peers in the peer pool
+	Listener listener(&loginManager); // Listen and accepts all pending connections, then adds them to the peer pool
 
 	bool running = true;
 	while (running) {
