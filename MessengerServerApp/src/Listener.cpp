@@ -25,6 +25,12 @@ void Listener::run() {
 			break;
 		}
 
+		struct timeval timeout;
+		timeout.tv_sec = 720;
+		timeout.tv_usec = 0;
+
+		setsockopt(sock->getSocketFid(), SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof timeout);
+
 		_loginManager->addPendingPeer(sock);
 		cout << "New peer connected: " << sock->destIpAndPort() << endl;
 	}
